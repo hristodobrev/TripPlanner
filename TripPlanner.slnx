@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="TripPlanner.API/TripPlanner.API.csproj" Id="0185f4ab-09da-4aac-a04d-559d573ed630" />
+  <Project Path="TripPlanner.Application/TripPlanner.Application.csproj" Id="c1366562-152c-47b1-9d6f-975b98b207b7" />
+  <Project Path="TripPlanner.Domain/TripPlanner.Domain.csproj" Id="e0d33bb1-867a-487c-bfa1-c1d81b55897d" />
+  <Project Path="TripPlanner.Infrastructure/TripPlanner.Infrastructure.csproj" Id="6f762526-8186-4a89-afc2-0494aad0356c" />
+</Solution>
