@@ -19,12 +19,16 @@ namespace TripPlanner.API.Controllers
         [HttpPost("register")]
         public async Task<AuthResponse> Register(RegisterRequest model)
         {
+            // TODO: Add validation and error handling
+
             return await _authService.RegisterAsync(model);
         }
 
         [HttpPost("login")]
         public async Task<AuthResponse> Login(LoginRequest model)
         {
+            // TODO: Add validation and error handling
+
             return await _authService.LoginAsync(model);
         }
 
