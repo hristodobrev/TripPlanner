@@ -1,4 +1,4 @@
-﻿namespace TripPlanner.Infrastructure.Models
+﻿namespace TripPlanner.Infrastructure.Models.Google
 {
     public class GooglePlaceAutoCompleteResult
     {
@@ -13,21 +13,16 @@
     public class PlacePrediction
     {
         public string PlaceId { get; set; } = string.Empty;
-        public TextValue Text { get; set; } = null!;
         public StructuredFormat StructuredFormat { get; set; } = null!;
-    }
-
-    public class TextValue
-    {
-        public string Text { get; set; } = string.Empty;
     }
 
     public class StructuredFormat
     {
-        public MainText MainText { get; set; } = null!;
+        public InnerText MainText { get; set; } = null!;
+        public InnerText SecondaryText { get; set; } = null!;
     }
 
-    public class MainText
+    public class InnerText
     {
         public string Text { get; set; } = string.Empty;
     }

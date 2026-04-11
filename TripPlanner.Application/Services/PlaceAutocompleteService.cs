@@ -6,9 +6,12 @@ namespace TripPlanner.Application.Services
     public class PlaceAutoCompleteService : IPlaceAutoCompleteService
     {
         private readonly IPlaceAutoCompleteProvider _provider;
-        public PlaceAutoCompleteService(IPlaceAutoCompleteProvider provider)
+        private readonly IPlaceService _placeService;
+
+        public PlaceAutoCompleteService(IPlaceAutoCompleteProvider provider, IPlaceService placeService)
         {
             _provider = provider;
+            _placeService = placeService;
         }
 
         public async Task<List<PlaceAutoCompleteResponse>> AutoCompleteAsync(string query)
@@ -18,17 +21,28 @@ namespace TripPlanner.Application.Services
             return result.Select(r => new PlaceAutoCompleteResponse
             {
                 PlaceId = r.PlaceId,
-                City = r.City,
-                Country = r.Country,
-                Description = r.Description
+                MainText = r.MainText,
+                SecondaryText = r.SecondaryText
             }).ToList();
         }
 
-        public Task<List<PlaceAutoCompleteResponse>> LocationAutoCompleteAsync(string placeId, string query)
+        public async Task<List<PlaceAutoCompleteResponse>> LocationAutoCompleteAsync(string placeId, string query)
         {
+            var place = await _placeService.GetOrCreateAsync(placeId);
 
+            if (place == null)
+            {
+                return await AutoCompleteAsync(query);
+            }
 
-            throw new NotImplementedException();
+            var result = await _provider.LocationAutoCompleteAsync(place.Latitude, place.Longitude, query);
+
+            return result.Select(r => new PlaceAutoCompleteResponse
+            {
+                PlaceId = r.PlaceId,
+                MainText = r.MainText,
+                SecondaryText = r.SecondaryText
+            }).ToList();
         }
     }
 }

@@ -10,6 +10,7 @@ using TripPlanner.Infrastructure.Configurations;
 using TripPlanner.Infrastructure.Persistence;
 using TripPlanner.Infrastructure.Repositories;
 using TripPlanner.Infrastructure.Services;
+using TripPlanner.Infrastructure.Services.Google;
 
 namespace TripPlanner.Infrastructure.Extensions
 {
@@ -48,18 +49,32 @@ namespace TripPlanner.Infrastructure.Extensions
 
             services.AddSingleton(jwtSettings);
             services.AddTransient<IJwtTokenService, JwtTokenService>();
+
             services.AddScoped<IPasswordHasher, PasswordHasher>();
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUserRepository, UserRepository>();
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             services.AddScoped<IPlaceAutoCompleteService, PlaceAutoCompleteService>();
             services.AddHttpClient<IPlaceAutoCompleteProvider, GooglePlaceAutoCompleteProvider>(client =>
             {
                 client.BaseAddress = new Uri("https://places.googleapis.com/v1/places:autocomplete");
                 var googlePlacesKey = configuration["GooglePlaces:ApiKey"];
                 client.DefaultRequestHeaders.Add("X-Goog-Api-Key", googlePlacesKey);
-                client.DefaultRequestHeaders.Add("X-Goog-FieldMask", "suggestions.placePrediction.placeId,suggestions.placePrediction.text.text,suggestions.placePrediction.structuredFormat.mainText.text");
+                client.DefaultRequestHeaders.Add("X-Goog-FieldMask", "suggestions.placePrediction.placeId,suggestions.placePrediction.structuredFormat.*");
             });
+
+            services.AddScoped<IPlaceService, PlaceService>();
+            services.AddHttpClient<IPlaceProvider, GooglePlaceProvider>(client =>
+            {
+                client.BaseAddress = new Uri("https://places.googleapis.com/v1/places/");
+                var googlePlacesKey = configuration["GooglePlaces:ApiKey"];
+                client.DefaultRequestHeaders.Add("X-Goog-Api-Key", googlePlacesKey);
+                client.DefaultRequestHeaders.Add("X-Goog-FieldMask", "id,displayName,location,addressComponents");
+            });
+            services.AddScoped<IPlaceRepository, PlaceRepository>();
 
             return services;
         }

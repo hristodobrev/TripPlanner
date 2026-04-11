@@ -2,7 +2,7 @@
 {
     public class Trip
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

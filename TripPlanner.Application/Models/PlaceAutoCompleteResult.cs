@@ -1,6 +1,6 @@
-﻿namespace TripPlanner.Application.DTOs.Response
+﻿namespace TripPlanner.Application.Models
 {
-    public class PlaceAutoCompleteResponse
+    public class PlaceAutoCompleteResult
     {
         public string PlaceId { get; set; } = string.Empty;
         public string MainText { get; set; } = string.Empty;

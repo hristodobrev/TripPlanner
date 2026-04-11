@@ -19,7 +19,9 @@ namespace TripPlanner.Infrastructure.Persistence.Configurations
                 .HasMaxLength(200);
 
             builder.Property(x => x.Country)
-                .IsRequired()
+                .HasMaxLength(100);
+
+            builder.Property(x => x.Locality)
                 .HasMaxLength(100);
 
             builder.Property(x => x.Latitude)

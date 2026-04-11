@@ -23,10 +23,5 @@ namespace TripPlanner.Infrastructure.Repositories
         {
             return _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
         }
-
-        public Task SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            return _dbContext.SaveChangesAsync(cancellationToken);
-        }
     }
 }
