@@ -52,6 +52,14 @@ namespace TripPlanner.Infrastructure.Extensions
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IPlaceAutocompleteService, PlaceAutocompleteService>();
+            services.AddHttpClient<IPlaceAutocompleteProvider, GooglePlaceAutocompleteProvider>(client =>
+            {
+                client.BaseAddress = new Uri("https://places.googleapis.com/v1/places:autocomplete");
+                var googlePlacesKey = configuration["GooglePlaces:ApiKey"];
+                client.DefaultRequestHeaders.Add("X-Goog-Api-Key", googlePlacesKey);
+                client.DefaultRequestHeaders.Add("X-Goog-FieldMask", "suggestions.placePrediction.placeId,suggestions.placePrediction.text.text,suggestions.placePrediction.structuredFormat.mainText.text");
+            });
 
             return services;
         }

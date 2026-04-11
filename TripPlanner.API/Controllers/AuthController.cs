@@ -32,12 +32,6 @@ namespace TripPlanner.API.Controllers
             return await _authService.LoginAsync(model);
         }
 
-        [HttpPost("google")]
-        public AuthResponse Google(GoogleLoginRequest model)
-        {
-            throw new NotImplementedException();
-        }
-
         [HttpGet]
         public AuthResponse Me()
         {
