@@ -3,13 +3,13 @@ using TripPlanner.Infrastructure.Models;
 
 namespace TripPlanner.Infrastructure.Mapping
 {
-    public static class GooglePlaceAutocompleteMapper
+    public static class GooglePlaceAutoCompleteMapper
     {
-        public static List<PlaceAutocompleteProviderResult> ToAutocompleteResults(this GooglePlaceAutocompleteResult response)
+        public static List<PlaceAutoCompleteProviderResult> ToAutoCompleteResults(this GooglePlaceAutoCompleteResult response)
         {
             if (response?.Suggestions == null)
             {
-                return new List<PlaceAutocompleteProviderResult>();
+                return new List<PlaceAutoCompleteProviderResult>();
             }
 
             return response.Suggestions
@@ -19,7 +19,7 @@ namespace TripPlanner.Infrastructure.Mapping
 
                     var fullText = prediction.Text?.Text ?? string.Empty;
 
-                    return new PlaceAutocompleteProviderResult
+                    return new PlaceAutoCompleteProviderResult
                     {
                         PlaceId = prediction.PlaceId,
                         City = prediction.StructuredFormat?.MainText?.Text ?? string.Empty,

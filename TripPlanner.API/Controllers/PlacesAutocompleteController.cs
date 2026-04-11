@@ -7,19 +7,26 @@ namespace TripPlanner.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class PlacesAutocompleteController : ControllerBase
+    public class PlacesAutoCompleteController : ControllerBase
     {
-        private readonly IPlaceAutocompleteService _placeAutocompleteService;
-        public PlacesAutocompleteController(IPlaceAutocompleteService placeAutocompleteService)
+        private readonly IPlaceAutoCompleteService _placeAutoCompleteService;
+        public PlacesAutoCompleteController(IPlaceAutoCompleteService placeAutoCompleteService)
         {
-            _placeAutocompleteService = placeAutocompleteService;
+            _placeAutoCompleteService = placeAutoCompleteService;
         }
 
-        // TODO: research which is best to return task of IActionResult or List<PlaceAutocompleteResponse>
         [HttpGet("{query}")]
-        public async Task<IActionResult> Autocomplete(string query)
+        public async Task<IActionResult> AutoComplete(string query)
         {
-            var result = await _placeAutocompleteService.AutocompleteAsync(query);
+            var result = await _placeAutoCompleteService.AutoCompleteAsync(query);
+
+            return Ok(result);
+        }
+
+        [HttpGet("{placeId}/{query}")]
+        public async Task<IActionResult> LocationAutoComplete(string placeId, string query)
+        {
+            var result = await _placeAutoCompleteService.LocationAutoCompleteAsync(placeId, query);
 
             return Ok(result);
         }

@@ -1,6 +1,6 @@
 ﻿namespace TripPlanner.Infrastructure.Models
 {
-    public class GooglePlaceAutocompleteResult
+    public class GooglePlaceAutoCompleteResult
     {
         public List<Suggestion> Suggestions { get; set; } = new();
     }

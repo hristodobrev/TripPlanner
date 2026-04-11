@@ -8,15 +8,15 @@ using TripPlanner.Infrastructure.Models;
 
 namespace TripPlanner.Infrastructure.Services
 {
-    public class GooglePlaceAutocompleteProvider : IPlaceAutocompleteProvider
+    public class GooglePlaceAutoCompleteProvider : IPlaceAutoCompleteProvider
     {
         private readonly HttpClient _httpClient;
-        public GooglePlaceAutocompleteProvider(HttpClient httpClient)
+        public GooglePlaceAutoCompleteProvider(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
 
-        public async Task<List<PlaceAutocompleteProviderResult>> AutocompleteAsync(string query)
+        public async Task<List<PlaceAutoCompleteProviderResult>> AutoCompleteAsync(string query)
         {
             //var url = "https://places.googleapis.com/v1/places:autocomplete";
 
@@ -36,9 +36,9 @@ namespace TripPlanner.Infrastructure.Services
             HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
             response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadFromJsonAsync<GooglePlaceAutocompleteResult>();
+            var result = await response.Content.ReadFromJsonAsync<GooglePlaceAutoCompleteResult>();
 
-            return result.ToAutocompleteResults();
+            return result.ToAutoCompleteResults();
         }
     }
 }

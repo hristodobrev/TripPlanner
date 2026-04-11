@@ -1,6 +1,6 @@
 ﻿namespace TripPlanner.Application.Models
 {
-    public class PlaceAutocompleteProviderResult
+    public class PlaceAutoCompleteProviderResult
     {
         public string PlaceId { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
