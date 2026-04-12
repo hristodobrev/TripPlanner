@@ -76,6 +76,9 @@ namespace TripPlanner.Infrastructure.Extensions
             });
             services.AddScoped<IPlaceRepository, PlaceRepository>();
 
+            services.AddScoped<ITripService, TripService>();
+            services.AddScoped<ITripRepository, TripRepository>();
+
             return services;
         }
     }

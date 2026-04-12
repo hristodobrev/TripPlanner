@@ -17,7 +17,6 @@ namespace TripPlanner.Infrastructure.Repositories
         public async Task AddAsync(Place place)
         {
             await _dbContext.Places.AddAsync(place);
-
         }
 
         public async Task<Place?> GetByExternalId(string externalId)

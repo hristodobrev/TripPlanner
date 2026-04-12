@@ -10,6 +10,12 @@ namespace TripPlanner.Infrastructure.Persistence.Configurations
         {
             builder.HasKey(t => t.Id);
 
+            builder.Property(t => t.Name)
+                .IsRequired();
+
+            builder.Property(t => t.Description)
+                .HasMaxLength(1000);
+
             builder.Property(t => t.StartDate)
                 .IsRequired();
 
