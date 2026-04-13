@@ -30,6 +30,15 @@ namespace TripPlanner.Infrastructure.Persistence.Configurations
             builder.Property(x => x.Longitude)
                 .HasPrecision(9, 6);
 
+            builder.Property(u => u.Rating)
+                .HasPrecision(3, 2);
+
+            builder.Property(u => u.WebsiteUri)
+                .HasMaxLength(500);
+
+            builder.Property(u => u.PrimaryTypeDisplayName)
+                .HasMaxLength(100);
+
             builder.Property(u => u.CreatedAtUtc)
                 .IsRequired();
         }

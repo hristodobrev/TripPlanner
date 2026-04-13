@@ -6,6 +6,7 @@ namespace TripPlanner.Application.Interfaces
     public interface ITripService
     {
         Task AddAsync(TripRequest request, Guid userId);
+        Task<TripResponse> GetByIdForUserAsync(Guid id, Guid userId);
         Task<IEnumerable<TripResponse>> GetByUserIdAsync(Guid userId);
     }
 }

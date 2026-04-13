@@ -4,8 +4,12 @@
     {
         public string Id { get; set; } = string.Empty;
         public Location Location { get; set; } = null!;
-        public DisplayName DisplayName { get; set; } = null!;
+        public LocalizedText DisplayName { get; set; } = null!;
         public List<AddressComponent> AddressComponents { get; set; } = new();
+        public double Rating { get; set; }
+        public string? WebsiteUri { get; set; }
+        public int UserRatingCount { get; set; }
+        public LocalizedText? PrimaryTypeDisplayName { get; set; }
     }
 
     public class Location
@@ -14,7 +18,7 @@
         public decimal Longitude { get; set; }
     }
 
-    public class DisplayName
+    public class LocalizedText
     {
         public string Text { get; set; } = string.Empty;
         public string LanguageCode { get; set; } = string.Empty;

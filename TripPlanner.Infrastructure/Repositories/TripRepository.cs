@@ -18,14 +18,14 @@ namespace TripPlanner.Infrastructure.Repositories
             await _dbContext.Trips.AddAsync(trip);
         }
 
-        public async Task<Trip?> GetByIdAsync(Guid id)
+        public async Task<Trip?> GetByIdForUserAsync(Guid id, Guid userId)
         {
-            return await _dbContext.Trips.FindAsync(id);
+            return await _dbContext.Trips.Where(t => t.Id == id && t.UserId == userId).Include(t => t.Place).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Trip>> GetByUserIdAsync(Guid userId)
         {
-            return await _dbContext.Trips.Where(t => t.UserId == userId).ToListAsync();
+            return await _dbContext.Trips.Where(t => t.UserId == userId).Include(t => t.Place).ToListAsync();
         }
     }
 }

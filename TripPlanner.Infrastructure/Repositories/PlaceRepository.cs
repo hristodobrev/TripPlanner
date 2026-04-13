@@ -23,5 +23,11 @@ namespace TripPlanner.Infrastructure.Repositories
         {
             return await _dbContext.Places.FirstOrDefaultAsync(p => p.ExternalPlaceId == externalId);
         }
+
+        public async Task<bool> CheckAllExternalIdsExist(string[] externalId)
+        {
+            var existingCount = await _dbContext.Places.CountAsync(p => externalId.Contains(p.ExternalPlaceId));
+            return existingCount == externalId.Length;
+        }
     }
 }

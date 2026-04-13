@@ -7,10 +7,8 @@
         public string? Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-
         public int DurationInDays => (EndDate - StartDate).Days;
-
-        // TODO: Add PlaceResponse and map it in TripService
+        public string? ExternalPlaceId { get; set; }
 
         public DateTime CreatedAtUtc { get; set; }
     }

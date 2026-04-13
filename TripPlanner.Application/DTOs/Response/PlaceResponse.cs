@@ -1,8 +1,8 @@
-﻿namespace TripPlanner.Domain.Entities
+﻿namespace TripPlanner.Application.DTOs.Response
 {
-    public class Place
+    public class PlaceResponse
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         public string? ExternalPlaceId { get; set; }
         public string Name { get; set; } = null!;
@@ -14,7 +14,5 @@
         public string? WebsiteUri { get; set; }
         public int UserRatingCount { get; set; }
         public string? PrimaryTypeDisplayName { get; set; }
-
-        public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     }
 }

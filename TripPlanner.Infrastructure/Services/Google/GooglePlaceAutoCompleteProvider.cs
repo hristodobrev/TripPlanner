@@ -45,7 +45,6 @@ namespace TripPlanner.Infrastructure.Services.Google
             var body = new
             {
                 input = query,
-                //includedPrimaryTypes = new string[] { "country", "locality" },
                 locationBias = new
                 {
                     circle = new

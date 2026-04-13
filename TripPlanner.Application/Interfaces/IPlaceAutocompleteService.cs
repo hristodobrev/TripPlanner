@@ -5,6 +5,6 @@ namespace TripPlanner.Application.Interfaces
     public interface IPlaceAutoCompleteService
     {
         Task<List<PlaceAutoCompleteResponse>> AutoCompleteAsync(string query);
-        Task<List<PlaceAutoCompleteResponse>> LocationAutoCompleteAsync(string placeId, string query);
+        Task<List<PlaceAutoCompleteResponse>> LocationAutoCompleteAsync(string externalPlaceId, string query);
     }
 }

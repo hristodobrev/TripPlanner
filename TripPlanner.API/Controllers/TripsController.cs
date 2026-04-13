@@ -33,5 +33,13 @@ namespace TripPlanner.API.Controllers
 
             return Ok(trips);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(Guid id)
+        {
+            var trip = await _tripService.GetByIdForUserAsync(id, User.GetUserId());
+
+            return Ok(trip);
+        }
     }
 }

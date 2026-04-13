@@ -17,7 +17,11 @@ namespace TripPlanner.Infrastructure.Mapping
                 Country = country,
                 Locality = city,
                 Latitude = response.Location?.Latitude ?? 0,
-                Longitude = response.Location?.Longitude ?? 0
+                Longitude = response.Location?.Longitude ?? 0,
+                Rating = response.Rating,
+                WebsiteUri = response.WebsiteUri,
+                UserRatingCount = response.UserRatingCount,
+                PrimaryTypeDisplayName = response.PrimaryTypeDisplayName?.Text
             };
         }
 

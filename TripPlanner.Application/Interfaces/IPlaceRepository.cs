@@ -6,5 +6,6 @@ namespace TripPlanner.Application.Interfaces
     {
         Task<Place?> GetByExternalId(string externalId);
         Task AddAsync(Place place);
+        Task<bool> CheckAllExternalIdsExist(string[] externalId);
     }
 }

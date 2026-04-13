@@ -8,5 +8,9 @@
         public string? Locality { get; set; }
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }
+        public double Rating { get; set; }
+        public string? WebsiteUri { get; set; }
+        public int UserRatingCount { get; set; }
+        public string? PrimaryTypeDisplayName { get; set; }
     }
 }

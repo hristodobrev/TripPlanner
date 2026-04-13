@@ -38,6 +38,25 @@ namespace TripPlanner.Application.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
+        public async Task<TripResponse> GetByIdForUserAsync(Guid id, Guid userId)
+        {
+            var trip = await _tripRepository.GetByIdForUserAsync(id, userId);
+
+            if (trip == null)
+                throw new InvalidOperationException("Trip not found");
+
+            return new TripResponse
+            {
+                Id = trip.Id,
+                Name = trip.Name,
+                Description = trip.Description,
+                StartDate = trip.StartDate,
+                EndDate = trip.EndDate,
+                ExternalPlaceId = trip.Place.ExternalPlaceId,
+                CreatedAtUtc = trip.CreatedAtUtc
+            };
+        }
+
         public async Task<IEnumerable<TripResponse>> GetByUserIdAsync(Guid userId)
         {
             var trips = await _tripRepository.GetByUserIdAsync(userId);
@@ -49,7 +68,7 @@ namespace TripPlanner.Application.Services
                 Description = t.Description,
                 StartDate = t.StartDate,
                 EndDate = t.EndDate,
-                Place = t.Place,
+                ExternalPlaceId = t.Place.ExternalPlaceId,
                 CreatedAtUtc = t.CreatedAtUtc
             });
         }
