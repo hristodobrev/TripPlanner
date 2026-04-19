@@ -8,8 +8,8 @@
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int DurationInDays => (EndDate - StartDate).Days;
-        public string? ExternalPlaceId { get; set; }
-
+        public string? DestinationExternalId { get; set; }
+        public IEnumerable<TripPlaceResponse> Places { get; set; } = null!;
         public DateTime CreatedAtUtc { get; set; }
     }
 }

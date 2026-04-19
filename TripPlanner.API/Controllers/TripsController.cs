@@ -41,5 +41,13 @@ namespace TripPlanner.API.Controllers
 
             return Ok(trip);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Remove(Guid id)
+        {
+            await _tripService.RemoveAsync(id, User.GetUserId());
+
+            return Ok();
+        }
     }
 }

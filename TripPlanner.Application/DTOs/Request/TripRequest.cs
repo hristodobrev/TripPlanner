@@ -8,6 +8,7 @@ namespace TripPlanner.Application.DTOs.Request
         [MaxLength(1000)]
         public string? Description { get; set; }
         public string PlaceId { get; set; } = null!;
+        public string PlaceName { get; set; } = null!;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
     }

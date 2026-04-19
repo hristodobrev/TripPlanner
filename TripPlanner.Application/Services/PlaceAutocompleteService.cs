@@ -28,7 +28,7 @@ namespace TripPlanner.Application.Services
 
         public async Task<List<PlaceAutoCompleteResponse>> LocationAutoCompleteAsync(string externalPlaceId, string query)
         {
-            var place = await _placeService.GetOrCreateAsync(externalPlaceId);
+            var place = await _placeService.GetByExternalIdAsync(externalPlaceId);
 
             if (place == null)
             {

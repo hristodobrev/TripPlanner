@@ -1,4 +1,5 @@
-﻿using TripPlanner.Application.DTOs.Response;
+﻿using TripPlanner.Application.DTOs.Request;
+using TripPlanner.Application.DTOs.Response;
 using TripPlanner.Application.Interfaces;
 using TripPlanner.Application.Models;
 using TripPlanner.Domain.Entities;
@@ -8,29 +9,61 @@ namespace TripPlanner.Application.Services
     public class PlaceService : IPlaceService
     {
         private readonly IPlaceRepository _placeRepository;
+        private readonly ITripRepository _tripRepository;
         private readonly IPlaceProvider _placeProvider;
         private readonly IUnitOfWork _unitOfWork;
 
-        public PlaceService(IPlaceRepository placeRepository, IPlaceProvider placeProvider, IUnitOfWork unitOfWork)
+        public PlaceService(IPlaceRepository placeRepository, ITripRepository tripRepository, IPlaceProvider placeProvider, IUnitOfWork unitOfWork)
         {
             _placeRepository = placeRepository;
+            _tripRepository = tripRepository;
             _placeProvider = placeProvider;
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Place> GetOrCreateAsync(string externalPlaceId)
+        public async Task AddAsync(AddTripPlaceRequest request, Guid userId)
         {
-            var place = await _placeRepository.GetByExternalId(externalPlaceId);
-
-            if (place != null)
+            var trip = await _tripRepository.GetByIdForUserAsync(request.TripId, userId);
+            if (trip == null)
             {
-                return place;
+                throw new InvalidOperationException("Trip not found");
             }
 
-            var placeResult = await _placeProvider.GetPlaceAsync(externalPlaceId);
-            place = new Place
+            var place = new Place
             {
-                ExternalPlaceId = placeResult.Id,
+                ExternalId = request.ExternalPlaceId,
+                TripId = request.TripId,
+                Name = request.Name
+            };
+            await _placeRepository.AddAsync(place);
+
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task RemoveAsync(Guid placeId, Guid userId)
+        {
+            var place = await _placeRepository.GetById(placeId);
+            if (place == null)
+            {
+                throw new InvalidOperationException("Place not found");
+            }
+
+            var trip = await _tripRepository.GetByIdForUserAsync(place.TripId, userId);
+            if (trip == null)
+            {
+                throw new InvalidOperationException("Trip not found");
+            }
+
+            _placeRepository.Remove(place);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<PlaceResult> GetByExternalIdAsync(string externalPlaceId)
+        {
+            var placeResult = await _placeProvider.GetPlaceAsync(externalPlaceId);
+            return new PlaceResult
+            {
+                Id = placeResult.Id,
                 Name = placeResult.Name,
                 Country = placeResult.Country,
                 Locality = placeResult.Locality,
@@ -41,17 +74,48 @@ namespace TripPlanner.Application.Services
                 Rating = placeResult.Rating,
                 PrimaryTypeDisplayName = placeResult.PrimaryTypeDisplayName
             };
+        }
 
-            await _placeRepository.AddAsync(place);
+        public async Task<IEnumerable<PlaceResponse>> GetPlacesForTripAsync(Guid tripId)
+        {
+            var places = await _placeRepository.GetByTripIdAsync(tripId);
 
-            await _unitOfWork.SaveChangesAsync();
+            return places.Select(p => new PlaceResponse
+            {
+                ExternalPlaceId = p.ExternalId,
+                Name = p.Name
+            });
+        }
 
-            return place;
+        public async Task<IEnumerable<PlaceResponse>> GetPlacesForTripWithDetailsAsync(Guid tripId)
+        {
+            var places = await _placeRepository.GetByTripIdAsync(tripId);
+
+            List<PlaceResponse> placeResponses = new List<PlaceResponse>();
+            foreach (var place in places)
+            {
+                var placeResult = await _placeProvider.GetPlaceAsync(place.ExternalId!);
+                placeResponses.Add(new PlaceResponse
+                {
+                    Id = place.Id,
+                    Name = placeResult.Name,
+                    Country = placeResult.Country,
+                    Locality = placeResult.Locality,
+                    Latitude = placeResult.Latitude,
+                    Longitude = placeResult.Longitude,
+                    WebsiteUri = placeResult.WebsiteUri,
+                    UserRatingCount = placeResult.UserRatingCount,
+                    Rating = placeResult.Rating,
+                    PrimaryTypeDisplayName = placeResult.PrimaryTypeDisplayName
+                });
+            }
+
+            return placeResponses;
         }
 
         public async Task<IEnumerable<PlaceResponse>> TextSearchPlacesAsync(string externalPlaceId, string query)
         {
-            var place = await _placeRepository.GetByExternalId(externalPlaceId);
+            var place = await _placeProvider.GetPlaceAsync(externalPlaceId);
 
             if (place == null)
             {
@@ -59,11 +123,6 @@ namespace TripPlanner.Application.Services
             }
 
             var placesResult = await _placeProvider.TextSearchPlacesAsync(place.Latitude, place.Longitude, query);
-
-            // TODO: Add logic which will insert all places in the DB to reduce the usage of quota
-
-            // TODO: Call only the TextSearch by Id which has unlimited quota and check for each returned Id if already exists in the DB
-            // if exists - get from DB, if not - call the regular TextSearch and insert in the DB
 
             var places = new List<PlaceResponse>();
             foreach (var placeResult in placesResult)

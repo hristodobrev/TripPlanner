@@ -19,15 +19,19 @@ namespace TripPlanner.Infrastructure.Repositories
             await _dbContext.Places.AddAsync(place);
         }
 
-        public async Task<Place?> GetByExternalId(string externalId)
+        public async Task<Place?> GetById(Guid id)
         {
-            return await _dbContext.Places.FirstOrDefaultAsync(p => p.ExternalPlaceId == externalId);
+            return await _dbContext.Places.FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<bool> CheckAllExternalIdsExist(string[] externalId)
+        public async Task<IEnumerable<Place>> GetByTripIdAsync(Guid tripId)
         {
-            var existingCount = await _dbContext.Places.CountAsync(p => externalId.Contains(p.ExternalPlaceId));
-            return existingCount == externalId.Length;
+            return await _dbContext.Places.Where(p => p.TripId == tripId).ToListAsync();
+        }
+
+        public void Remove(Place place)
+        {
+            _dbContext.Places.Remove(place);
         }
     }
 }

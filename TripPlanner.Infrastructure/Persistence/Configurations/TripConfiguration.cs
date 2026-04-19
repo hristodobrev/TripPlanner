@@ -22,7 +22,10 @@ namespace TripPlanner.Infrastructure.Persistence.Configurations
             builder.Property(t => t.EndDate)
                 .IsRequired();
 
-            builder.Property(t => t.PlaceId)
+            builder.Property(t => t.DestinationExternalId)
+                .IsRequired();
+
+            builder.Property(t => t.DestinationName)
                 .IsRequired();
 
             builder.Property(t => t.UserId)
@@ -30,11 +33,6 @@ namespace TripPlanner.Infrastructure.Persistence.Configurations
 
             builder.Property(t => t.CreatedAtUtc)
                 .IsRequired();
-
-            builder.HasOne(t => t.Place)
-                .WithMany()
-                .HasForeignKey(t => t.PlaceId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(t => t.User)
                 .WithMany(u => u.Trips)

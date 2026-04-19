@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TripPlanner.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using TripPlanner.Infrastructure.Persistence;
 namespace TripPlanner.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260418201206_RemovedPlaceColumns")]
+    partial class RemovedPlaceColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,7 +34,7 @@ namespace TripPlanner.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ExternalId")
+                    b.Property<string>("ExternalPlaceId")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -41,12 +44,7 @@ namespace TripPlanner.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<Guid>("TripId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("TripId");
 
                     b.ToTable("Places");
                 });
@@ -64,20 +62,15 @@ namespace TripPlanner.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<string>("DestinationExternalId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DestinationName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PlaceId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -87,9 +80,36 @@ namespace TripPlanner.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PlaceId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Trips");
+                });
+
+            modelBuilder.Entity("TripPlanner.Domain.Entities.TripPlace", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("PlaceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TripId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlaceId");
+
+                    b.HasIndex("TripId", "PlaceId")
+                        .IsUnique();
+
+                    b.ToTable("TripPlaces");
                 });
 
             modelBuilder.Entity("TripPlanner.Domain.Entities.User", b =>
@@ -128,31 +148,47 @@ namespace TripPlanner.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("TripPlanner.Domain.Entities.Place", b =>
-                {
-                    b.HasOne("TripPlanner.Domain.Entities.Trip", "Trip")
-                        .WithMany("Places")
-                        .HasForeignKey("TripId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Trip");
-                });
-
             modelBuilder.Entity("TripPlanner.Domain.Entities.Trip", b =>
                 {
+                    b.HasOne("TripPlanner.Domain.Entities.Place", "Place")
+                        .WithMany()
+                        .HasForeignKey("PlaceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("TripPlanner.Domain.Entities.User", "User")
                         .WithMany("Trips")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Place");
+
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TripPlanner.Domain.Entities.TripPlace", b =>
+                {
+                    b.HasOne("TripPlanner.Domain.Entities.Place", "Place")
+                        .WithMany()
+                        .HasForeignKey("PlaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TripPlanner.Domain.Entities.Trip", "Trip")
+                        .WithMany("TripPlaces")
+                        .HasForeignKey("TripId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Place");
+
+                    b.Navigation("Trip");
                 });
 
             modelBuilder.Entity("TripPlanner.Domain.Entities.Trip", b =>
                 {
-                    b.Navigation("Places");
+                    b.Navigation("TripPlaces");
                 });
 
             modelBuilder.Entity("TripPlanner.Domain.Entities.User", b =>

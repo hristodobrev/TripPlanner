@@ -4,8 +4,9 @@ namespace TripPlanner.Application.Interfaces
 {
     public interface IPlaceRepository
     {
-        Task<Place?> GetByExternalId(string externalId);
+        Task<Place?> GetById(Guid id);
         Task AddAsync(Place place);
-        Task<bool> CheckAllExternalIdsExist(string[] externalId);
+        void Remove(Place place);
+        Task <IEnumerable<Place>> GetByTripIdAsync(Guid tripId);
     }
 }

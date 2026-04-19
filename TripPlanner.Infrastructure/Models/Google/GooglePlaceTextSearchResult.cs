@@ -2,6 +2,6 @@
 {
     public class GooglePlaceTextSearchResult
     {
-        public List<GooglePlaceResult> Places { get; set; }
+        public List<GooglePlaceResult> Places { get; set; } = null!;
     }
 }

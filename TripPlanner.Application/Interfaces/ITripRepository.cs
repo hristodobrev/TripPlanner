@@ -5,6 +5,7 @@ namespace TripPlanner.Application.Interfaces
     public interface ITripRepository
     {
         Task AddAsync(Trip trip);
+        void Remove(Trip trip);
         Task<Trip?> GetByIdForUserAsync(Guid id, Guid userId);
         Task<IEnumerable<Trip>> GetByUserIdAsync(Guid userId);
     }

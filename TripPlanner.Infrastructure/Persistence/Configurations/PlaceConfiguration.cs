@@ -10,34 +10,18 @@ namespace TripPlanner.Infrastructure.Persistence.Configurations
         {
             builder.HasKey(p => p.Id);
 
-            builder.Property(x => x.ExternalPlaceId)
+            builder.HasOne(p => p.Trip)
+                .WithMany(t => t.Places)
+                .HasForeignKey(p => p.TripId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(x => x.ExternalId)
             .IsRequired()
             .HasMaxLength(200);
 
             builder.Property(x => x.Name)
                 .IsRequired()
                 .HasMaxLength(200);
-
-            builder.Property(x => x.Country)
-                .HasMaxLength(100);
-
-            builder.Property(x => x.Locality)
-                .HasMaxLength(100);
-
-            builder.Property(x => x.Latitude)
-                .HasPrecision(9, 6);
-
-            builder.Property(x => x.Longitude)
-                .HasPrecision(9, 6);
-
-            builder.Property(u => u.Rating)
-                .HasPrecision(3, 2);
-
-            builder.Property(u => u.WebsiteUri)
-                .HasMaxLength(500);
-
-            builder.Property(u => u.PrimaryTypeDisplayName)
-                .HasMaxLength(100);
 
             builder.Property(u => u.CreatedAtUtc)
                 .IsRequired();
