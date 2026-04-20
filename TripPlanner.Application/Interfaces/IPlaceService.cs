@@ -6,11 +6,12 @@ namespace TripPlanner.Application.Interfaces
 {
     public interface IPlaceService
     {
-        Task AddAsync(AddTripPlaceRequest request, Guid userId);
-        Task RemoveAsync(Guid placeId, Guid userId);
-        public Task<PlaceResult> GetByExternalIdAsync(string externalPlaceId);
-        public Task<IEnumerable<PlaceResponse>> TextSearchPlacesAsync(string externalPlaceId, string query);
-        public Task<IEnumerable<PlaceResponse>> GetPlacesForTripWithDetailsAsync(Guid tripId);
-        public Task<IEnumerable<PlaceResponse>> GetPlacesForTripAsync(Guid tripId);
+        Task<Guid> AddAsync(AddPlaceRequest request, Guid userId);
+        Task RemoveAsync(Guid id, Guid userId);
+        Task UpdateAsync(Guid id, UpdatePlaceRequest request, Guid userId);
+        Task ReorderAsync(ReorderPlacesRequest request, Guid userId);
+        public Task<PlaceResult> GetByExternalIdAsync(string externalId);
+        public Task<IEnumerable<PlaceSearchResponse>> TextSearchPlacesAsync(string externalId, string query);
+        public Task<IEnumerable<PlaceDetailsResponse>> GetPlacesForTripWithDetailsAsync(Guid tripId);
     }
 }

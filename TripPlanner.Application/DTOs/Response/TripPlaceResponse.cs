@@ -3,8 +3,8 @@
     public class TripPlaceResponse
     {
         public Guid Id { get; set; }
-
-        public string? ExternalId { get; set; }
+        public int? DayNumber { get; set; }
         public string Name { get; set; } = null!;
+        public string? Note { get; set; }
     }
 }

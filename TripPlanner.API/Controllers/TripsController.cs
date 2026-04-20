@@ -21,9 +21,9 @@ namespace TripPlanner.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(TripRequest request)
         {
-            await _tripService.AddAsync(request, User.GetUserId());
+            Guid id = await _tripService.AddAsync(request, User.GetUserId());
 
-            return Ok();
+            return Ok(id);
         }
 
         [HttpGet]

@@ -17,7 +17,7 @@ namespace TripPlanner.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task AddAsync(TripRequest request, Guid userId)
+        public async Task<Guid> AddAsync(TripRequest request, Guid userId)
         {
             var tripToAdd = new Trip
             {
@@ -32,6 +32,8 @@ namespace TripPlanner.Application.Services
 
             await _tripRepository.AddAsync(tripToAdd);
             await _unitOfWork.SaveChangesAsync();
+
+            return tripToAdd.Id;
         }
 
         public async Task RemoveAsync(Guid tripId, Guid userId)
@@ -63,8 +65,10 @@ namespace TripPlanner.Application.Services
                 DestinationExternalId = trip.DestinationExternalId,
                 Places = trip.Places.Select(p => new TripPlaceResponse
                 {
-                    ExternalId = p.ExternalId,
-                    Name = p.Name
+                    Id = p.Id,
+                    DayNumber = p.DayNumber,
+                    Name = p.Name,
+                    Note = p.Note
                 }),
                 CreatedAtUtc = trip.CreatedAtUtc
             };

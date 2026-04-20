@@ -22,7 +22,7 @@ namespace TripPlanner.Infrastructure.Repositories
         {
             return await _dbContext.Trips
                 .Where(t => t.Id == id && t.UserId == userId)
-                .Include(t => t.Places)
+                .Include(t => t.Places.OrderBy(p => p.Order))
                 .FirstOrDefaultAsync();
         }
 

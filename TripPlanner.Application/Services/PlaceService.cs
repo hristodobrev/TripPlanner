@@ -21,9 +21,9 @@ namespace TripPlanner.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task AddAsync(AddTripPlaceRequest request, Guid userId)
+        public async Task<Guid> AddAsync(AddPlaceRequest request, Guid userId)
         {
-            var trip = await _tripRepository.GetByIdForUserAsync(request.TripId, userId);
+            var trip = await _tripRepository.GetByIdForUserAsync(request.TripId!.Value, userId);
             if (trip == null)
             {
                 throw new InvalidOperationException("Trip not found");
@@ -31,18 +31,20 @@ namespace TripPlanner.Application.Services
 
             var place = new Place
             {
-                ExternalId = request.ExternalPlaceId,
-                TripId = request.TripId,
+                ExternalId = request.ExternalId,
+                TripId = request.TripId!.Value,
                 Name = request.Name
             };
             await _placeRepository.AddAsync(place);
 
             await _unitOfWork.SaveChangesAsync();
+
+            return place.Id;
         }
 
         public async Task RemoveAsync(Guid placeId, Guid userId)
         {
-            var place = await _placeRepository.GetById(placeId);
+            var place = await _placeRepository.GetByIdAsync(placeId);
             if (place == null)
             {
                 throw new InvalidOperationException("Place not found");
@@ -58,9 +60,53 @@ namespace TripPlanner.Application.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<PlaceResult> GetByExternalIdAsync(string externalPlaceId)
+        public async Task UpdateAsync(Guid id, UpdatePlaceRequest request, Guid userId)
         {
-            var placeResult = await _placeProvider.GetPlaceAsync(externalPlaceId);
+            var place = await _placeRepository.GetByIdAsync(id);
+
+            if (place == null)
+            {
+                throw new InvalidOperationException("Place not found");
+            }
+
+            place.Note = request.Note;
+
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task ReorderAsync(ReorderPlacesRequest request, Guid userId)
+        {
+            var trip = await _tripRepository.GetByIdForUserAsync(request.TripId!.Value, userId);
+            if (trip == null)
+            {
+                throw new InvalidOperationException("Trip not found");
+            }
+
+            var places = await _placeRepository.GetByTripIdAsync(request.TripId!.Value);
+            var placesById = places.ToDictionary(p => p.Id);
+            foreach (var day in request.Days)
+            {
+                if (day.DayNumber > trip.DurationInDays)
+                {
+                    throw new InvalidOperationException($"Day number {day.DayNumber} exceeds trip duration of {trip.DurationInDays} days");
+                }
+                for (var i = 0; i < day.PlaceIds.Count; i++)
+                {
+                    var placeId = day.PlaceIds[i];
+                    if (!placesById.TryGetValue(placeId, out var place))
+                        throw new InvalidOperationException($"Place with ID {placeId} not found in trip");
+
+                    place.DayNumber = day.DayNumber;
+                    place.Order = i + 1;
+                }
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<PlaceResult> GetByExternalIdAsync(string externalId)
+        {
+            var placeResult = await _placeProvider.GetPlaceAsync(externalId);
             return new PlaceResult
             {
                 Id = placeResult.Id,
@@ -76,29 +122,19 @@ namespace TripPlanner.Application.Services
             };
         }
 
-        public async Task<IEnumerable<PlaceResponse>> GetPlacesForTripAsync(Guid tripId)
+        public async Task<IEnumerable<PlaceDetailsResponse>> GetPlacesForTripWithDetailsAsync(Guid tripId)
         {
             var places = await _placeRepository.GetByTripIdAsync(tripId);
 
-            return places.Select(p => new PlaceResponse
-            {
-                ExternalPlaceId = p.ExternalId,
-                Name = p.Name
-            });
-        }
-
-        public async Task<IEnumerable<PlaceResponse>> GetPlacesForTripWithDetailsAsync(Guid tripId)
-        {
-            var places = await _placeRepository.GetByTripIdAsync(tripId);
-
-            List<PlaceResponse> placeResponses = new List<PlaceResponse>();
+            List<PlaceDetailsResponse> placeResponses = new List<PlaceDetailsResponse>();
             foreach (var place in places)
             {
                 var placeResult = await _placeProvider.GetPlaceAsync(place.ExternalId!);
-                placeResponses.Add(new PlaceResponse
+                placeResponses.Add(new PlaceDetailsResponse
                 {
                     Id = place.Id,
                     Name = placeResult.Name,
+                    Note = place.Note,
                     Country = placeResult.Country,
                     Locality = placeResult.Locality,
                     Latitude = placeResult.Latitude,
@@ -113,7 +149,7 @@ namespace TripPlanner.Application.Services
             return placeResponses;
         }
 
-        public async Task<IEnumerable<PlaceResponse>> TextSearchPlacesAsync(string externalPlaceId, string query)
+        public async Task<IEnumerable<PlaceSearchResponse>> TextSearchPlacesAsync(string externalPlaceId, string query)
         {
             var place = await _placeProvider.GetPlaceAsync(externalPlaceId);
 
@@ -124,10 +160,10 @@ namespace TripPlanner.Application.Services
 
             var placesResult = await _placeProvider.TextSearchPlacesAsync(place.Latitude, place.Longitude, query);
 
-            var places = new List<PlaceResponse>();
+            var places = new List<PlaceSearchResponse>();
             foreach (var placeResult in placesResult)
             {
-                places.Add(new PlaceResponse
+                places.Add(new PlaceSearchResponse
                 {
                     Latitude = placeResult.Latitude,
                     Longitude = placeResult.Longitude,

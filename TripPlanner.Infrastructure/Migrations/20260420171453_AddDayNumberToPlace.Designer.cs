@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TripPlanner.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using TripPlanner.Infrastructure.Persistence;
 namespace TripPlanner.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260420171453_AddDayNumberToPlace")]
+    partial class AddDayNumberToPlace
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,9 +46,6 @@ namespace TripPlanner.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Order")
                         .HasColumnType("int");
