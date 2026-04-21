@@ -19,7 +19,7 @@ namespace TripPlanner.Infrastructure.Repositories
             if (place.Order == 0)
             {
                 var maxOrder = await _dbContext.Places
-                    .Where(p => p.TripId == place.TripId)
+                    .Where(p => p.TripId == place.TripId && p.DayNumber == place.DayNumber)
                     .MaxAsync(p => (int?)p.Order) ?? 0;
                 place.Order = maxOrder + 1;
             }
@@ -32,12 +32,27 @@ namespace TripPlanner.Infrastructure.Repositories
             return await _dbContext.Places.FirstOrDefaultAsync(p => p.Id == id);
         }
 
+        public async Task<IEnumerable<Place>> GetByOrderAndDayAsync(Guid tripId, Guid placeId, int order, int? dayNumber)
+        {
+            return await _dbContext.Places
+                .Where(p => p.TripId == tripId && p.Id != placeId && p.Order >= order && p.DayNumber == dayNumber)
+                .OrderBy(p => p.Order)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Place>> GetByTripIdAsync(Guid tripId)
         {
             return await _dbContext.Places
                 .Where(p => p.TripId == tripId)
                 .OrderBy(p => p.Order)
                 .ToListAsync();
+        }
+
+        public async Task<int> GetMaxOrderForDay(Guid tripId, int? dayNumber)
+        {
+            return await _dbContext.Places
+                .Where(p => p.TripId == tripId && p.DayNumber == dayNumber)
+                .MaxAsync(p => (int?)p.Order) ?? 0;
         }
 
         public void Remove(Place place)

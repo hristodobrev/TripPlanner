@@ -70,6 +70,8 @@ namespace TripPlanner.Application.Services
             }
 
             place.Note = request.Note;
+            place.DurationMinues = request.DurationMinutes;
+            place.PlannedTime = request.PlannedTime;
 
             await _unitOfWork.SaveChangesAsync();
         }
@@ -82,24 +84,43 @@ namespace TripPlanner.Application.Services
                 throw new InvalidOperationException("Trip not found");
             }
 
-            var places = await _placeRepository.GetByTripIdAsync(request.TripId!.Value);
-            var placesById = places.ToDictionary(p => p.Id);
-            foreach (var day in request.Days)
+            var sourcePlace = await _placeRepository.GetByIdAsync(request.SourceId!.Value);
+            if (sourcePlace == null || sourcePlace.TripId != request.TripId)
             {
-                if (day.DayNumber > trip.DurationInDays)
-                {
-                    throw new InvalidOperationException($"Day number {day.DayNumber} exceeds trip duration of {trip.DurationInDays} days");
-                }
-                for (var i = 0; i < day.PlaceIds.Count; i++)
-                {
-                    var placeId = day.PlaceIds[i];
-                    if (!placesById.TryGetValue(placeId, out var place))
-                        throw new InvalidOperationException($"Place with ID {placeId} not found in trip");
+                throw new InvalidOperationException("Place not found in the specified trip");
+            }
 
-                    place.DayNumber = day.DayNumber;
-                    place.Order = i + 1;
+            Place? targetPlace = null;
+            if (request.TargetId != null)
+            {
+                targetPlace = await _placeRepository.GetByIdAsync(request.TargetId.Value);
+                if (targetPlace == null || targetPlace.TripId != request.TripId)
+                {
+                    throw new InvalidOperationException("Place not found in the specified trip");
+                }
+
+                int targetOrder = targetPlace.Order;
+                sourcePlace.Order = targetPlace.Order;
+                var placesToReorder = await _placeRepository.GetByOrderAndDayAsync(request.TripId!.Value, sourcePlace.Id, targetPlace.Order, request.DayNumber);
+                for (int i = 0; i < placesToReorder.Count(); i++)
+                {
+                    var currentPlace = placesToReorder.ElementAt(i);
+                    var previousPlace = i == 0 ? targetPlace : placesToReorder.ElementAt(i - 1);
+
+                    if (currentPlace.PlannedTime < previousPlace.PlannedTime?.AddMinutes(previousPlace.DurationMinues ?? 0))
+                    {
+                        currentPlace.PlannedTime = previousPlace.PlannedTime?.AddMinutes(previousPlace.DurationMinues ?? 0);
+                    }
+
+                    currentPlace.Order = targetOrder + i + 1;
                 }
             }
+            else
+            {
+                sourcePlace.Order = await _placeRepository.GetMaxOrderForDay(request.TripId!.Value, request.DayNumber) + 1;
+            }
+
+            sourcePlace.DayNumber = request.DayNumber;
 
             await _unitOfWork.SaveChangesAsync();
         }
@@ -179,6 +200,21 @@ namespace TripPlanner.Application.Services
             }
 
             return places;
+        }
+
+        public async Task<IEnumerable<TripPlaceResponse>> GetPlacesForTripAsync(Guid tripId)
+        {
+            var places = await _placeRepository.GetByTripIdAsync(tripId);
+
+            return places.Select(place => new TripPlaceResponse
+            {
+                Id = place.Id,
+                Name = place.Name,
+                Note = place.Note,
+                DayNumber = place.DayNumber,
+                DurationMinutes = place.DurationMinues,
+                PlannedTime = place.PlannedTime
+            });
         }
     }
 }

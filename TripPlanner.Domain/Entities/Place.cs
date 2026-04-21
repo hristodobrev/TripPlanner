@@ -9,6 +9,8 @@
         public string? ExternalId { get; set; }
         public string Name { get; set; } = null!;
         public string? Note { get; set; }
+        public TimeOnly? PlannedTime { get; set; }
+        public int? DurationMinues { get; set; }
 
         public Guid TripId { get; set; }
         public Trip Trip { get; set; } = null!;

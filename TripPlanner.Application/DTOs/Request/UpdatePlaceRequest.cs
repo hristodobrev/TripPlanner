@@ -7,5 +7,7 @@ namespace TripPlanner.Application.DTOs.Request
         [Required]
         public Guid? PlaceId { get; set; }
         public string? Note { get; set; }
+        public TimeOnly? PlannedTime { get; set; }
+        public int? DurationMinutes { get; set; }
     }
 }

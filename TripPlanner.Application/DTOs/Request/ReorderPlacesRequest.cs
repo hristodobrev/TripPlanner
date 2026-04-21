@@ -6,14 +6,9 @@ namespace TripPlanner.Application.DTOs.Request
     {
         [Required]
         public Guid? TripId { get; set; }
-        [Required]
-        public List<DayReorder> Days { get; set; } = null!;
-    }
-
-    public class DayReorder
-    {
         public int? DayNumber { get; set; }
         [Required]
-        public List<Guid> PlaceIds { get; set; } = null!;
+        public Guid? SourceId { get; set; }
+        public Guid? TargetId { get; set; }
     }
 }

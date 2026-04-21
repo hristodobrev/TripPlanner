@@ -68,7 +68,9 @@ namespace TripPlanner.Application.Services
                     Id = p.Id,
                     DayNumber = p.DayNumber,
                     Name = p.Name,
-                    Note = p.Note
+                    Note = p.Note,
+                    DurationMinutes = p.DurationMinues,
+                    PlannedTime = p.PlannedTime
                 }),
                 CreatedAtUtc = trip.CreatedAtUtc
             };

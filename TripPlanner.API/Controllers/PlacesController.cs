@@ -54,7 +54,9 @@ namespace TripPlanner.API.Controllers
         {
             await _placeService.ReorderAsync(request, User.GetUserId());
 
-            return Ok();
+            var places = await _placeService.GetPlacesForTripAsync(request.TripId!.Value);
+
+            return Ok(places);
         }
     }
 }

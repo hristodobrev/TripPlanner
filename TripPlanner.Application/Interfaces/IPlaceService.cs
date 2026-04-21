@@ -13,5 +13,6 @@ namespace TripPlanner.Application.Interfaces
         public Task<PlaceResult> GetByExternalIdAsync(string externalId);
         public Task<IEnumerable<PlaceSearchResponse>> TextSearchPlacesAsync(string externalId, string query);
         public Task<IEnumerable<PlaceDetailsResponse>> GetPlacesForTripWithDetailsAsync(Guid tripId);
+        public Task<IEnumerable<TripPlaceResponse>> GetPlacesForTripAsync(Guid tripId);
     }
 }
