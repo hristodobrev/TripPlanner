@@ -99,23 +99,38 @@ namespace TripPlanner.Application.Services
                     throw new InvalidOperationException("Place not found in the specified trip");
                 }
 
+                var places = await _placeRepository.GetByTripIdAndDayNumberAsync(request.TripId.Value, targetPlace.DayNumber);
                 int targetOrder = targetPlace.Order;
-                sourcePlace.Order = targetPlace.Order;
-                var placesToReorder = await _placeRepository.GetByOrderAndDayAsync(request.TripId!.Value, sourcePlace.Id, targetPlace.Order, request.DayNumber);
-                for (int i = 0; i < placesToReorder.Count(); i++)
+                if (targetPlace.Order > sourcePlace.Order)
                 {
-                    var currentPlace = placesToReorder.ElementAt(i);
-                    var previousPlace = i == 0 ? targetPlace : placesToReorder.ElementAt(i - 1);
+                    foreach (var place in places.Where(p => p.Order <= targetPlace.Order && p.Order >= sourcePlace.Order && p.Id != sourcePlace.Id))
+                    {
+                        place.Order -= 1;
+                    }
+                }
+                else
+                {
+                    foreach (var place in places.Where(p => p.Order >= targetPlace.Order && p.Order <= sourcePlace.Order && p.Id != sourcePlace.Id))
+                    {
+                        place.Order += 1;
+                    }
+                }
+                sourcePlace.Order = targetOrder;
+                sourcePlace.PlannedTime = targetPlace.PlannedTime ?? sourcePlace.PlannedTime;
+
+                var placesToUpdateTime = places.Where(p => p.PlannedTime != null).OrderBy(p => p.Order);
+                for (int i = 1; i < placesToUpdateTime.Count(); i++)
+                {
+                    var currentPlace = placesToUpdateTime.ElementAt(i);
+                    var previousPlace = placesToUpdateTime.ElementAt(i - 1);
 
                     if (currentPlace.PlannedTime < previousPlace.PlannedTime?.AddMinutes(previousPlace.DurationMinues ?? 0))
                     {
                         currentPlace.PlannedTime = previousPlace.PlannedTime?.AddMinutes(previousPlace.DurationMinues ?? 0);
                     }
-
-                    currentPlace.Order = targetOrder + i + 1;
                 }
             }
-            else
+            else if (sourcePlace.DayNumber != request.DayNumber)
             {
                 sourcePlace.Order = await _placeRepository.GetMaxOrderForDay(request.TripId!.Value, request.DayNumber) + 1;
             }

@@ -32,10 +32,10 @@ namespace TripPlanner.Infrastructure.Repositories
             return await _dbContext.Places.FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<IEnumerable<Place>> GetByOrderAndDayAsync(Guid tripId, Guid placeId, int order, int? dayNumber)
+        public async Task<IEnumerable<Place>> GetByTripIdAndDayNumberAsync(Guid tripId, int? dayNumber)
         {
             return await _dbContext.Places
-                .Where(p => p.TripId == tripId && p.Id != placeId && p.Order >= order && p.DayNumber == dayNumber)
+                .Where(p => p.TripId == tripId && p.DayNumber == dayNumber)
                 .OrderBy(p => p.Order)
                 .ToListAsync();
         }
