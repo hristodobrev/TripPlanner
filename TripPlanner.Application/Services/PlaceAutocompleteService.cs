@@ -25,24 +25,5 @@ namespace TripPlanner.Application.Services
                 SecondaryText = r.SecondaryText
             }).ToList();
         }
-
-        public async Task<List<PlaceAutoCompleteResponse>> LocationAutoCompleteAsync(string externalPlaceId, string query)
-        {
-            var place = await _placeService.GetByExternalIdAsync(externalPlaceId);
-
-            if (place == null)
-            {
-                return await AutoCompleteAsync(query);
-            }
-
-            var result = await _provider.LocationAutoCompleteAsync(place.Latitude, place.Longitude, query);
-
-            return result.Select(r => new PlaceAutoCompleteResponse
-            {
-                PlaceId = r.PlaceId,
-                MainText = r.MainText,
-                SecondaryText = r.SecondaryText
-            }).ToList();
-        }
     }
 }

@@ -25,6 +25,14 @@ namespace TripPlanner.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{externalPlaceId}")]
+        public async Task<IActionResult> GetPlace(string externalPlaceId)
+        {
+            var result = await _placeService.GetByExternalIdAsync(externalPlaceId);
+
+            return Ok(result);
+        }
+
         [HttpPost]
         public async Task<IActionResult> AddPlace(AddPlaceRequest request)
         {

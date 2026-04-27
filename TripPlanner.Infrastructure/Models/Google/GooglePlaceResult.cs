@@ -7,9 +7,16 @@
         public LocalizedText DisplayName { get; set; } = null!;
         public List<AddressComponent> AddressComponents { get; set; } = new();
         public double Rating { get; set; }
+        public string FormattedAddress { get; set; }
         public string? WebsiteUri { get; set; }
         public int UserRatingCount { get; set; }
         public LocalizedText? PrimaryTypeDisplayName { get; set; }
+        public List<Photo> Photos { get; set; } = new();
+    }
+
+    public class Photo
+    {
+        public string Name { get; set; } = string.Empty;
     }
 
     public class Location

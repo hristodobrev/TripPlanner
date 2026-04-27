@@ -8,12 +8,12 @@ namespace TripPlanner.Application.Services
     public class TripService : ITripService
     {
         private readonly ITripRepository _tripRepository;
-        private readonly IPlaceRepository _placeRepository;
+        private readonly IPlaceService _placeService;
         private readonly IUnitOfWork _unitOfWork;
-        public TripService(ITripRepository tripRepository, IPlaceRepository placeRepository, IUnitOfWork unitOfWork)
+        public TripService(ITripRepository tripRepository, IPlaceService placeService, IUnitOfWork unitOfWork)
         {
             _tripRepository = tripRepository;
-            _placeRepository = placeRepository;
+            _placeService = placeService;
             _unitOfWork = unitOfWork;
         }
 
@@ -55,6 +55,8 @@ namespace TripPlanner.Application.Services
             if (trip == null)
                 throw new InvalidOperationException("Trip not found");
 
+            var places = await _placeService.GetPlacesForTripWithDetailsAsync(id);
+
             return new TripResponse
             {
                 Id = trip.Id,
@@ -63,14 +65,24 @@ namespace TripPlanner.Application.Services
                 StartDate = trip.StartDate,
                 EndDate = trip.EndDate,
                 DestinationExternalId = trip.DestinationExternalId,
-                Places = trip.Places.Select(p => new TripPlaceResponse
+                Places = places.Select(p => new PlaceDetailsResponse
                 {
                     Id = p.Id,
+                    ExternalPlaceId = p.ExternalPlaceId,
+                    FormattedAddress = p.FormattedAddress,
                     DayNumber = p.DayNumber,
                     Name = p.Name,
                     Note = p.Note,
-                    DurationMinutes = p.DurationMinues,
-                    PlannedTime = p.PlannedTime
+                    DurationMinutes = p.DurationMinutes,
+                    PlannedTime = p.PlannedTime,
+                    Locality = p.Locality,
+                    Country = p.Country,
+                    Latitude = p.Latitude,
+                    Longitude = p.Longitude,
+                    Rating = p.Rating,
+                    WebsiteUri = p.WebsiteUri,
+                    UserRatingCount = p.UserRatingCount,
+                    PrimaryTypeDisplayName = p.PrimaryTypeDisplayName
                 }),
                 CreatedAtUtc = trip.CreatedAtUtc
             };

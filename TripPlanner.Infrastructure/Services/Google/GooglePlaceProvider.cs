@@ -18,7 +18,8 @@ namespace TripPlanner.Infrastructure.Services.Google
 
         public async Task<PlaceResult> GetPlaceAsync(string externalPlaceId)
         {
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, externalPlaceId);
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, $"v1/places/{externalPlaceId}");
+            requestMessage.Headers.Add("X-Goog-FieldMask", "id,displayName,location,addressComponents,formattedAddress,rating,websiteUri,userRatingCount,primaryTypeDisplayName,photos");
 
             HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
             response.EnsureSuccessStatusCode();
@@ -28,6 +29,23 @@ namespace TripPlanner.Infrastructure.Services.Google
             return result.ToPlaceResult();
         }
 
+        public async Task<List<string>> GetPlacePhotosAsync(List<string> photoNames)
+        {
+            List<string> photoUrls = new List<string>();
+            foreach (var photoName in photoNames)
+            {
+                HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, $"v1/{photoName}/media?maxWidthPx=800&skipHttpRedirect=true");
+
+                HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
+                response.EnsureSuccessStatusCode();
+
+                var result = await response.Content.ReadFromJsonAsync<GooglePlacePhotoResult>();
+
+                photoUrls.Add(result.PhotoUri);
+            }
+
+            return photoUrls;
+        }
         public async Task<List<PlaceResult>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query)
         {
             var body = new
@@ -45,12 +63,11 @@ namespace TripPlanner.Infrastructure.Services.Google
 
             var json = JsonSerializer.Serialize(body);
 
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, ":searchText")
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, "v1/places:searchText")
             {
                 Content = new StringContent(json, Encoding.UTF8, "application/json")
             };
-            //requestMessage.Headers.Add("X-Goog-FieldMask", "places.id,places.displayName,places.location,places.formattedAddress,places.addressComponents");
-            requestMessage.Headers.Add("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress,places.priceLevel,places.location,places.rating,places.priceRange,places.priceLevel,places.userRatingCount,places.websiteUri,places.primaryTypeDisplayName,places.addressComponents");
+            requestMessage.Headers.Add("X-Goog-FieldMask", "places.id,places.displayName,places.priceLevel,places.location,places.rating,places.priceRange,places.priceLevel,places.userRatingCount,places.websiteUri,places.primaryTypeDisplayName,places.addressComponents,places.photos");
 
             HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
             response.EnsureSuccessStatusCode();

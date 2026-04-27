@@ -14,5 +14,6 @@
         public string? WebsiteUri { get; set; }
         public int UserRatingCount { get; set; }
         public string? PrimaryTypeDisplayName { get; set; }
+        public List<string> PhotoUrls { get; set; } = null!;
     }
 }

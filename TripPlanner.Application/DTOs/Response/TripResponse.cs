@@ -9,7 +9,7 @@
         public DateTime EndDate { get; set; }
         public int DurationInDays => (EndDate - StartDate).Days;
         public string? DestinationExternalId { get; set; }
-        public IEnumerable<TripPlaceResponse> Places { get; set; } = null!;
+        public IEnumerable<PlaceDetailsResponse> Places { get; set; } = null!;
         public DateTime CreatedAtUtc { get; set; }
     }
 }

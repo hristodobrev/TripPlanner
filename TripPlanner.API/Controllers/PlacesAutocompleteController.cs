@@ -22,13 +22,5 @@ namespace TripPlanner.API.Controllers
 
             return Ok(result);
         }
-
-        [HttpGet("{placeId}/{query}")]
-        public async Task<IActionResult> LocationAutoComplete(string externalPlaceId, string query)
-        {
-            var result = await _placeAutoCompleteService.LocationAutoCompleteAsync(externalPlaceId, query);
-
-            return Ok(result);
-        }
     }
 }

@@ -38,36 +38,5 @@ namespace TripPlanner.Infrastructure.Services.Google
 
             return result.ToAutoCompleteResults();
         }
-
-        // TODO: think of a way to avoid code duplication between this method and the one above
-        public async Task<List<PlaceAutoCompleteResult>> LocationAutoCompleteAsync(decimal latitude, decimal longitude, string query)
-        {
-            var body = new
-            {
-                input = query,
-                locationBias = new
-                {
-                    circle = new
-                    {
-                        center = new { latitude, longitude },
-                        radius = 5000
-                    }
-                }
-            };
-
-            var json = JsonSerializer.Serialize(body);
-
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, string.Empty)
-            {
-                Content = new StringContent(json, Encoding.UTF8, "application/json")
-            };
-
-            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
-            response.EnsureSuccessStatusCode();
-
-            var result = await response.Content.ReadFromJsonAsync<GooglePlaceAutoCompleteResult>();
-
-            return result.ToAutoCompleteResults();
-        }
     }
 }

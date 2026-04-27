@@ -140,18 +140,20 @@ namespace TripPlanner.Application.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<PlaceResult> GetByExternalIdAsync(string externalId)
+        public async Task<GetPlaceResponse> GetByExternalIdAsync(string externalId)
         {
             var placeResult = await _placeProvider.GetPlaceAsync(externalId);
-            return new PlaceResult
+            return new GetPlaceResponse
             {
-                Id = placeResult.Id,
+                ExternalId = placeResult.Id,
+                FormattedAddress = placeResult.FormattedAddress,
                 Name = placeResult.Name,
                 Country = placeResult.Country,
                 Locality = placeResult.Locality,
                 Latitude = placeResult.Latitude,
                 Longitude = placeResult.Longitude,
                 WebsiteUri = placeResult.WebsiteUri,
+                PhotoUrls = await _placeProvider.GetPlacePhotosAsync(placeResult.Photos.Take(5).Select(p => p.Name).ToList()),
                 UserRatingCount = placeResult.UserRatingCount,
                 Rating = placeResult.Rating,
                 PrimaryTypeDisplayName = placeResult.PrimaryTypeDisplayName
@@ -169,6 +171,11 @@ namespace TripPlanner.Application.Services
                 placeResponses.Add(new PlaceDetailsResponse
                 {
                     Id = place.Id,
+                    ExternalPlaceId = placeResult.Id,
+                    FormattedAddress = placeResult.FormattedAddress,
+                    DayNumber = place.DayNumber,
+                    DurationMinutes = place.DurationMinues,
+                    PlannedTime = place.PlannedTime,
                     Name = placeResult.Name,
                     Note = place.Note,
                     Country = placeResult.Country,
@@ -195,7 +202,7 @@ namespace TripPlanner.Application.Services
             }
 
             var placesResult = await _placeProvider.TextSearchPlacesAsync(place.Latitude, place.Longitude, query);
-
+            
             var places = new List<PlaceSearchResponse>();
             foreach (var placeResult in placesResult)
             {
@@ -210,7 +217,8 @@ namespace TripPlanner.Application.Services
                     WebsiteUri = placeResult.WebsiteUri,
                     UserRatingCount = placeResult.UserRatingCount,
                     Rating = placeResult.Rating,
-                    PrimaryTypeDisplayName = placeResult.PrimaryTypeDisplayName
+                    PrimaryTypeDisplayName = placeResult.PrimaryTypeDisplayName,
+                    PhotoUrls = await _placeProvider.GetPlacePhotosAsync(placeResult.Photos.Take(5).Select(p => p.Name).ToList()) // TODO: optimize the image retrieval
                 });
             }
 

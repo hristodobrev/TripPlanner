@@ -69,10 +69,9 @@ namespace TripPlanner.Infrastructure.Extensions
             services.AddScoped<IPlaceService, PlaceService>();
             services.AddHttpClient<IPlaceProvider, GooglePlaceProvider>(client =>
             {
-                client.BaseAddress = new Uri("https://places.googleapis.com/v1/places/");
+                client.BaseAddress = new Uri("https://places.googleapis.com/");
                 var googlePlacesKey = configuration["GooglePlaces:ApiKey"];
                 client.DefaultRequestHeaders.Add("X-Goog-Api-Key", googlePlacesKey);
-                client.DefaultRequestHeaders.Add("X-Goog-FieldMask", "id,displayName,location,addressComponents,rating,websiteUri,userRatingCount,primaryTypeDisplayName");
             });
             services.AddScoped<IPlaceRepository, PlaceRepository>();
 

@@ -14,6 +14,7 @@ namespace TripPlanner.Infrastructure.Mapping
             {
                 Id = response.Id,
                 Name = response.DisplayName?.Text ?? string.Empty,
+                FormattedAddress = response.FormattedAddress,
                 Country = country,
                 Locality = city,
                 Latitude = response.Location?.Latitude ?? 0,
@@ -21,7 +22,8 @@ namespace TripPlanner.Infrastructure.Mapping
                 Rating = response.Rating,
                 WebsiteUri = response.WebsiteUri,
                 UserRatingCount = response.UserRatingCount,
-                PrimaryTypeDisplayName = response.PrimaryTypeDisplayName?.Text
+                PrimaryTypeDisplayName = response.PrimaryTypeDisplayName?.Text,
+                Photos = response.Photos.Select(p => new PlacePhotoResult { Name = p.Name }).ToList()
             };
         }
 
