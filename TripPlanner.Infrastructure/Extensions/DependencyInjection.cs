@@ -57,7 +57,7 @@ namespace TripPlanner.Infrastructure.Extensions
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            services.AddScoped<IPlaceAutoCompleteService, PlaceAutoCompleteService>();
+            services.AddScoped<IPlaceSearchService, PlaceSearchService>();
             services.AddHttpClient<IPlaceAutoCompleteProvider, GooglePlaceAutoCompleteProvider>(client =>
             {
                 client.BaseAddress = new Uri("https://places.googleapis.com/v1/places:autocomplete");

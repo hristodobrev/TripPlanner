@@ -1,4 +1,6 @@
-﻿namespace TripPlanner.Application.DTOs.Response
+﻿using TripPlanner.Domain.Enums;
+
+namespace TripPlanner.Application.DTOs.Response
 {
     public class TripPlaceResponse
     {
@@ -8,5 +10,6 @@
         public string? Note { get; set; }
         public int? DurationMinutes { get; set; }
         public TimeOnly? PlannedTime { get; set; }
+        public PlaceStatus Status { get; set; }
     }
 }

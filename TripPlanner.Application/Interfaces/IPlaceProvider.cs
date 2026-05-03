@@ -4,8 +4,11 @@ namespace TripPlanner.Application.Interfaces
 {
     public interface IPlaceProvider
     {
-        public Task<PlaceResult> GetPlaceAsync(string externalPlaceId);
-        public Task<List<PlaceResult>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query);
-        public Task<List<string>> GetPlacePhotosAsync(List<string> photoNames);
+        Task<List<PlaceAutoCompleteResult>> AutoCompleteAsync(string query);
+        Task<PlaceResult> GetPlaceAsync(string externalPlaceId);
+        Task<List<PlaceResult>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query);
+        Task<List<PlaceResult>> NearbySearchPlacesAsync(decimal latitude, decimal longitude);
+        Task<List<string>> GetPlacePhotosAsync(List<string> photoNames);
+        Task<string> GetPlacePhotoAsync(string photoName);
     }
 }

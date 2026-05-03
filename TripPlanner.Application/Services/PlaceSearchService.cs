@@ -1,0 +1,128 @@
+﻿using TripPlanner.Application.DTOs.Response;
+using TripPlanner.Application.Interfaces;
+
+namespace TripPlanner.Application.Services
+{
+    public class PlaceSearchService : IPlaceSearchService
+    {
+        private readonly IPlaceRepository _placeRepository;
+        private readonly IPlaceProvider _placeProvider;
+
+        public PlaceSearchService(IPlaceProvider placeProvider, IPlaceRepository placeRepository)
+        {
+            _placeProvider = placeProvider;
+            _placeRepository = placeRepository;
+        }
+
+        public async Task<List<PlaceAutoCompleteResponse>> AutoCompleteAsync(string query)
+        {
+            var result = await _placeProvider.AutoCompleteAsync(query);
+
+            return result.Select(r => new PlaceAutoCompleteResponse
+            {
+                PlaceId = r.PlaceId,
+                MainText = r.MainText,
+                SecondaryText = r.SecondaryText
+            }).ToList();
+        }
+        public async Task<GetPlaceResponse> GetByExternalIdAsync(string externalId)
+        {
+            var placeResult = await _placeProvider.GetPlaceAsync(externalId);
+            return new GetPlaceResponse
+            {
+                ExternalId = placeResult.Id,
+                FormattedAddress = placeResult.FormattedAddress,
+                Name = placeResult.Name,
+                Country = placeResult.Country,
+                Locality = placeResult.Locality,
+                Latitude = placeResult.Latitude,
+                Longitude = placeResult.Longitude,
+                WebsiteUri = placeResult.WebsiteUri,
+                PhotoUrls = await _placeProvider.GetPlacePhotosAsync(placeResult.Photos.Take(5).Select(p => p.Name).ToList()),
+                UserRatingCount = placeResult.UserRatingCount,
+                Rating = placeResult.Rating,
+                PrimaryTypeDisplayName = placeResult.PrimaryTypeDisplayName
+            };
+        }
+
+        public async Task<IEnumerable<PlaceDetailsResponse>> GetPlacesForTripWithDetailsAsync(Guid tripId)
+        {
+            var places = await _placeRepository.GetByTripIdAsync(tripId);
+
+            List<PlaceDetailsResponse> placeResponses = new List<PlaceDetailsResponse>();
+            foreach (var place in places)
+            {
+                var placeResult = await _placeProvider.GetPlaceAsync(place.ExternalId!);
+                placeResponses.Add(new PlaceDetailsResponse
+                {
+                    Id = place.Id,
+                    ExternalPlaceId = placeResult.Id,
+                    FormattedAddress = placeResult.FormattedAddress,
+                    DayNumber = place.DayNumber,
+                    DurationMinutes = place.DurationMinues,
+                    PlannedTime = place.PlannedTime,
+                    Name = placeResult.Name,
+                    Note = place.Note,
+                    Status = place.Status,
+                    Country = placeResult.Country,
+                    Locality = placeResult.Locality,
+                    Latitude = placeResult.Latitude,
+                    Longitude = placeResult.Longitude,
+                    WebsiteUri = placeResult.WebsiteUri,
+                    UserRatingCount = placeResult.UserRatingCount,
+                    Rating = placeResult.Rating,
+                    PrimaryTypeDisplayName = placeResult.PrimaryTypeDisplayName
+                });
+            }
+
+            return placeResponses;
+        }
+
+        public async Task<IEnumerable<PlaceTextSearchResponse>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query)
+        {
+            var placesResult = await _placeProvider.TextSearchPlacesAsync(latitude, longitude, query);
+
+            var places = new List<PlaceTextSearchResponse>();
+            foreach (var placeResult in placesResult)
+            {
+                places.Add(new PlaceTextSearchResponse
+                {
+                    Latitude = placeResult.Latitude,
+                    Longitude = placeResult.Longitude,
+                    ExternalPlaceId = placeResult.Id,
+                    Name = placeResult.Name,
+                    Country = placeResult.Country,
+                    Locality = placeResult.Locality,
+                    WebsiteUri = placeResult.WebsiteUri,
+                    UserRatingCount = placeResult.UserRatingCount,
+                    Rating = placeResult.Rating,
+                    PrimaryTypeDisplayName = placeResult.PrimaryTypeDisplayName,
+                    PhotoUrl = await _placeProvider.GetPlacePhotoAsync(placeResult.Photos.Take(1).Select(p => p.Name).FirstOrDefault())
+                });
+            }
+
+            return places;
+        }
+
+        public async Task<IEnumerable<PlaceNearbySearchResponse>> NearbySearchPlacesAsync(decimal latitude, decimal longitude)
+        {
+            var placesResult = await _placeProvider.NearbySearchPlacesAsync(latitude, longitude);
+
+            var places = new List<PlaceNearbySearchResponse>();
+            foreach (var placeResult in placesResult)
+            {
+                places.Add(new PlaceNearbySearchResponse
+                {
+                    Latitude = placeResult.Latitude,
+                    Longitude = placeResult.Longitude,
+                    ExternalPlaceId = placeResult.Id,
+                    Name = placeResult.Name,
+                    UserRatingCount = placeResult.UserRatingCount,
+                    Rating = placeResult.Rating,
+                });
+            }
+
+            return places;
+        }
+    }
+}

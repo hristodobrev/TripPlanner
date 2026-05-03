@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TripPlanner.Domain.Enums;
 
 namespace TripPlanner.Application.DTOs.Request
 {

@@ -1,18 +1,11 @@
-﻿using TripPlanner.Domain.Enums;
-
-namespace TripPlanner.Application.DTOs.Response
+﻿namespace TripPlanner.Application.DTOs.Response
 {
-    public class PlaceDetailsResponse
+    public class PlaceTextSearchResponse
     {
         public Guid Id { get; set; }
+
         public string? ExternalPlaceId { get; set; }
-        public string FormattedAddress { get; set; }
-        public int? DayNumber { get; set; }
-        public int? DurationMinutes { get; set; }
-        public TimeOnly? PlannedTime { get; set; }
-        public PlaceStatus Status { get; set; }
         public string Name { get; set; } = null!;
-        public string? Note { get; set; }
         public string? Locality { get; set; }
         public string? Country { get; set; }
         public decimal Latitude { get; set; }
@@ -21,5 +14,6 @@ namespace TripPlanner.Application.DTOs.Response
         public string? WebsiteUri { get; set; }
         public int UserRatingCount { get; set; }
         public string? PrimaryTypeDisplayName { get; set; }
+        public string? PhotoUrl { get; set; }
     }
 }

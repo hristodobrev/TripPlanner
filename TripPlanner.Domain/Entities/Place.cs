@@ -1,4 +1,6 @@
-﻿namespace TripPlanner.Domain.Entities
+﻿using TripPlanner.Domain.Enums;
+
+namespace TripPlanner.Domain.Entities
 {
     public class Place
     {
@@ -11,6 +13,7 @@
         public string? Note { get; set; }
         public TimeOnly? PlannedTime { get; set; }
         public int? DurationMinues { get; set; }
+        public PlaceStatus Status { get; set; } = PlaceStatus.Planned;
 
         public Guid TripId { get; set; }
         public Trip Trip { get; set; } = null!;

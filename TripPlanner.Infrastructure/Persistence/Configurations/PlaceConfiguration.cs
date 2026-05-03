@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TripPlanner.Domain.Entities;
+using TripPlanner.Domain.Enums;
 
 namespace TripPlanner.Infrastructure.Persistence.Configurations
 {
@@ -22,6 +23,10 @@ namespace TripPlanner.Infrastructure.Persistence.Configurations
             builder.Property(x => x.Name)
                 .IsRequired()
                 .HasMaxLength(200);
+
+            builder.Property(x => x.Status)
+                .IsRequired()
+                .HasDefaultValue(PlaceStatus.Planned);
 
             builder.Property(u => u.CreatedAtUtc)
                 .IsRequired();

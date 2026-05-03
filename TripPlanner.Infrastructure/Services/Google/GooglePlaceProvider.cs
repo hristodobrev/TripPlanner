@@ -16,6 +16,30 @@ namespace TripPlanner.Infrastructure.Services.Google
             _httpClient = httpClient;
         }
 
+        public async Task<List<PlaceAutoCompleteResult>> AutoCompleteAsync(string query)
+        {
+            var body = new
+            {
+                input = query,
+                includedPrimaryTypes = new string[] { "country", "locality" }
+            };
+
+            var json = JsonSerializer.Serialize(body);
+
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, "v1/places:autocomplete")
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
+            requestMessage.Headers.Add("X-Goog-FieldMask", "suggestions.placePrediction.placeId,suggestions.placePrediction.structuredFormat.*");
+
+            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<GooglePlaceAutoCompleteResult>();
+
+            return result.ToAutoCompleteResults();
+        }
+
         public async Task<PlaceResult> GetPlaceAsync(string externalPlaceId)
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, $"v1/places/{externalPlaceId}");
@@ -46,11 +70,25 @@ namespace TripPlanner.Infrastructure.Services.Google
 
             return photoUrls;
         }
+
+        public async Task<string> GetPlacePhotoAsync(string photoName)
+        {
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, $"v1/{photoName}/media?maxWidthPx=800&skipHttpRedirect=true");
+
+            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<GooglePlacePhotoResult>();
+
+            return result.PhotoUri;
+        }
+
         public async Task<List<PlaceResult>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query)
         {
             var body = new
             {
                 textQuery = query,
+                pageSize = 10,
                 locationBias = new
                 {
                     circle = new
@@ -67,9 +105,47 @@ namespace TripPlanner.Infrastructure.Services.Google
             {
                 Content = new StringContent(json, Encoding.UTF8, "application/json")
             };
-            requestMessage.Headers.Add("X-Goog-FieldMask", "places.id,places.displayName,places.priceLevel,places.location,places.rating,places.priceRange,places.priceLevel,places.userRatingCount,places.websiteUri,places.primaryTypeDisplayName,places.addressComponents,places.photos");
+            requestMessage.Headers.Add("X-Goog-FieldMask", "places.id,places.displayName,places.priceLevel,places.location,places.rating,places.priceRange,places.userRatingCount,places.websiteUri,places.primaryTypeDisplayName,places.addressComponents,places.photos");
 
             HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<GooglePlaceTextSearchResult>();
+
+            var returnResult = new List<PlaceResult>();
+            foreach (var item in result.Places)
+            {
+                returnResult.Add(item.ToPlaceResult());
+            }
+
+            return returnResult;
+        }
+        
+        public async Task<List<PlaceResult>> NearbySearchPlacesAsync(decimal latitude, decimal longitude)
+        {
+            var body = new
+            {
+                includedTypes = new string[] { "bed_and_breakfast", "budget_japanese_inn", "campground", "camping_cabin", "cottage", "extended_stay_hotel", "farmstay", "guest_house", "hostel", "hotel", "inn", "japanese_inn", "lodging", "mobile_home_park", "motel", "private_guest_room", "resort_hotel", "rv_park" },
+                locationRestriction = new
+                {
+                    circle = new
+                    {
+                        center = new { latitude, longitude },
+                        radius = 5000
+                    }
+                }
+            };
+
+            var json = JsonSerializer.Serialize(body);
+
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, "v1/places:searchNearby")
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
+            requestMessage.Headers.Add("X-Goog-FieldMask", "places.id,places.displayName,places.priceLevel,places.location,places.priceRange,places.rating,places.userRatingCount");
+
+            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
+            string rs = await response.Content.ReadAsStringAsync();
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<GooglePlaceTextSearchResult>();

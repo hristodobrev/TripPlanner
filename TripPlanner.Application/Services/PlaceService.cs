@@ -1,7 +1,6 @@
 ﻿using TripPlanner.Application.DTOs.Request;
 using TripPlanner.Application.DTOs.Response;
 using TripPlanner.Application.Interfaces;
-using TripPlanner.Application.Models;
 using TripPlanner.Domain.Entities;
 
 namespace TripPlanner.Application.Services
@@ -10,15 +9,29 @@ namespace TripPlanner.Application.Services
     {
         private readonly IPlaceRepository _placeRepository;
         private readonly ITripRepository _tripRepository;
-        private readonly IPlaceProvider _placeProvider;
         private readonly IUnitOfWork _unitOfWork;
 
-        public PlaceService(IPlaceRepository placeRepository, ITripRepository tripRepository, IPlaceProvider placeProvider, IUnitOfWork unitOfWork)
+        public PlaceService(IPlaceRepository placeRepository, ITripRepository tripRepository, IUnitOfWork unitOfWork)
         {
             _placeRepository = placeRepository;
             _tripRepository = tripRepository;
-            _placeProvider = placeProvider;
             _unitOfWork = unitOfWork;
+        }
+
+        public async Task<IEnumerable<TripPlaceResponse>> GetPlacesForTripAsync(Guid tripId)
+        {
+            var places = await _placeRepository.GetByTripIdAsync(tripId);
+
+            return places.Select(place => new TripPlaceResponse
+            {
+                Id = place.Id,
+                Name = place.Name,
+                Note = place.Note,
+                DayNumber = place.DayNumber,
+                DurationMinutes = place.DurationMinues,
+                PlannedTime = place.PlannedTime,
+                Status = place.Status
+            });
         }
 
         public async Task<Guid> AddAsync(AddPlaceRequest request, Guid userId)
@@ -72,6 +85,20 @@ namespace TripPlanner.Application.Services
             place.Note = request.Note;
             place.DurationMinues = request.DurationMinutes;
             place.PlannedTime = request.PlannedTime;
+
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task UpdateStatusAsync(Guid id, UpdatePlaceStatusRequest request, Guid userId)
+        {
+            var place = await _placeRepository.GetByIdAsync(id);
+
+            if (place == null)
+            {
+                throw new InvalidOperationException("Place not found");
+            }
+
+            place.Status = request.Status;
 
             await _unitOfWork.SaveChangesAsync();
         }
@@ -138,106 +165,6 @@ namespace TripPlanner.Application.Services
             sourcePlace.DayNumber = request.DayNumber;
 
             await _unitOfWork.SaveChangesAsync();
-        }
-
-        public async Task<GetPlaceResponse> GetByExternalIdAsync(string externalId)
-        {
-            var placeResult = await _placeProvider.GetPlaceAsync(externalId);
-            return new GetPlaceResponse
-            {
-                ExternalId = placeResult.Id,
-                FormattedAddress = placeResult.FormattedAddress,
-                Name = placeResult.Name,
-                Country = placeResult.Country,
-                Locality = placeResult.Locality,
-                Latitude = placeResult.Latitude,
-                Longitude = placeResult.Longitude,
-                WebsiteUri = placeResult.WebsiteUri,
-                PhotoUrls = await _placeProvider.GetPlacePhotosAsync(placeResult.Photos.Take(5).Select(p => p.Name).ToList()),
-                UserRatingCount = placeResult.UserRatingCount,
-                Rating = placeResult.Rating,
-                PrimaryTypeDisplayName = placeResult.PrimaryTypeDisplayName
-            };
-        }
-
-        public async Task<IEnumerable<PlaceDetailsResponse>> GetPlacesForTripWithDetailsAsync(Guid tripId)
-        {
-            var places = await _placeRepository.GetByTripIdAsync(tripId);
-
-            List<PlaceDetailsResponse> placeResponses = new List<PlaceDetailsResponse>();
-            foreach (var place in places)
-            {
-                var placeResult = await _placeProvider.GetPlaceAsync(place.ExternalId!);
-                placeResponses.Add(new PlaceDetailsResponse
-                {
-                    Id = place.Id,
-                    ExternalPlaceId = placeResult.Id,
-                    FormattedAddress = placeResult.FormattedAddress,
-                    DayNumber = place.DayNumber,
-                    DurationMinutes = place.DurationMinues,
-                    PlannedTime = place.PlannedTime,
-                    Name = placeResult.Name,
-                    Note = place.Note,
-                    Country = placeResult.Country,
-                    Locality = placeResult.Locality,
-                    Latitude = placeResult.Latitude,
-                    Longitude = placeResult.Longitude,
-                    WebsiteUri = placeResult.WebsiteUri,
-                    UserRatingCount = placeResult.UserRatingCount,
-                    Rating = placeResult.Rating,
-                    PrimaryTypeDisplayName = placeResult.PrimaryTypeDisplayName
-                });
-            }
-
-            return placeResponses;
-        }
-
-        public async Task<IEnumerable<PlaceSearchResponse>> TextSearchPlacesAsync(string externalPlaceId, string query)
-        {
-            var place = await _placeProvider.GetPlaceAsync(externalPlaceId);
-
-            if (place == null)
-            {
-                throw new InvalidOperationException("Place not found");
-            }
-
-            var placesResult = await _placeProvider.TextSearchPlacesAsync(place.Latitude, place.Longitude, query);
-            
-            var places = new List<PlaceSearchResponse>();
-            foreach (var placeResult in placesResult)
-            {
-                places.Add(new PlaceSearchResponse
-                {
-                    Latitude = placeResult.Latitude,
-                    Longitude = placeResult.Longitude,
-                    ExternalPlaceId = placeResult.Id,
-                    Name = placeResult.Name,
-                    Country = placeResult.Country,
-                    Locality = placeResult.Locality,
-                    WebsiteUri = placeResult.WebsiteUri,
-                    UserRatingCount = placeResult.UserRatingCount,
-                    Rating = placeResult.Rating,
-                    PrimaryTypeDisplayName = placeResult.PrimaryTypeDisplayName,
-                    PhotoUrls = await _placeProvider.GetPlacePhotosAsync(placeResult.Photos.Take(5).Select(p => p.Name).ToList()) // TODO: optimize the image retrieval
-                });
-            }
-
-            return places;
-        }
-
-        public async Task<IEnumerable<TripPlaceResponse>> GetPlacesForTripAsync(Guid tripId)
-        {
-            var places = await _placeRepository.GetByTripIdAsync(tripId);
-
-            return places.Select(place => new TripPlaceResponse
-            {
-                Id = place.Id,
-                Name = place.Name,
-                Note = place.Note,
-                DayNumber = place.DayNumber,
-                DurationMinutes = place.DurationMinues,
-                PlannedTime = place.PlannedTime
-            });
         }
     }
 }

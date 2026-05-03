@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TripPlanner.API.Extensions;
 using TripPlanner.Application.DTOs.Request;
 using TripPlanner.Application.Interfaces;
+using TripPlanner.Domain.Enums;
 
 namespace TripPlanner.API.Controllers
 {
@@ -17,22 +18,6 @@ namespace TripPlanner.API.Controllers
             _placeService = placeService;
         }
 
-        [HttpGet("{externalPlaceId}/{query}")]
-        public async Task<IActionResult> Search(string externalPlaceId, string query)
-        {
-            var result = await _placeService.TextSearchPlacesAsync(externalPlaceId, query);
-
-            return Ok(result);
-        }
-
-        [HttpGet("{externalPlaceId}")]
-        public async Task<IActionResult> GetPlace(string externalPlaceId)
-        {
-            var result = await _placeService.GetByExternalIdAsync(externalPlaceId);
-
-            return Ok(result);
-        }
-
         [HttpPost]
         public async Task<IActionResult> AddPlace(AddPlaceRequest request)
         {
@@ -45,6 +30,14 @@ namespace TripPlanner.API.Controllers
         public async Task<IActionResult> UpdatePlace(Guid id, UpdatePlaceRequest request)
         {
             await _placeService.UpdateAsync(id, request, User.GetUserId());
+
+            return Ok();
+        }
+
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> UpdatePlaceStatus(Guid id, UpdatePlaceStatusRequest request)
+        {
+            await _placeService.UpdateStatusAsync(id, request, User.GetUserId());
 
             return Ok();
         }
