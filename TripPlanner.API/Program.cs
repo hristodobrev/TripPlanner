@@ -1,4 +1,7 @@
 using Microsoft.OpenApi;
+using TripPlanner.API.Middlewares;
+using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Services;
 using TripPlanner.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -45,6 +49,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<CurrentUserMiddleware>();
 
 app.UseAuthorization();
 

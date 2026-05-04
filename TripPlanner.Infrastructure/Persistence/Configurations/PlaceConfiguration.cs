@@ -25,8 +25,7 @@ namespace TripPlanner.Infrastructure.Persistence.Configurations
                 .HasMaxLength(200);
 
             builder.Property(x => x.Status)
-                .IsRequired()
-                .HasDefaultValue(PlaceStatus.Planned);
+                .IsRequired();
 
             builder.Property(u => u.CreatedAtUtc)
                 .IsRequired();

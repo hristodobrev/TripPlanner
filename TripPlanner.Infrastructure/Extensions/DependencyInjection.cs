@@ -19,8 +19,11 @@ namespace TripPlanner.Infrastructure.Extensions
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(
-                    configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")),
+                optionsLifetime: ServiceLifetime.Singleton);
+
+            services.AddDbContextFactory<AppDbContext>(options =>
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
             var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>()!;
 
@@ -58,20 +61,22 @@ namespace TripPlanner.Infrastructure.Extensions
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddScoped<IPlaceSearchService, PlaceSearchService>();
-            services.AddHttpClient<IPlaceAutoCompleteProvider, GooglePlaceAutoCompleteProvider>(client =>
-            {
-                client.BaseAddress = new Uri("https://places.googleapis.com/v1/places:autocomplete");
-                var googlePlacesKey = configuration["GooglePlaces:ApiKey"];
-                client.DefaultRequestHeaders.Add("X-Goog-Api-Key", googlePlacesKey);
-                client.DefaultRequestHeaders.Add("X-Goog-FieldMask", "suggestions.placePrediction.placeId,suggestions.placePrediction.structuredFormat.*");
-            });
 
             services.AddScoped<IPlaceService, PlaceService>();
-            services.AddHttpClient<IPlaceProvider, GooglePlaceProvider>(client =>
+            services.AddScoped<IPlaceProviderRequestLogRepository, PlaceProviderRequestLogRepository>();
+            services.AddHttpClient<GooglePlaceProvider>(client =>
             {
                 client.BaseAddress = new Uri("https://places.googleapis.com/");
                 var googlePlacesKey = configuration["GooglePlaces:ApiKey"];
                 client.DefaultRequestHeaders.Add("X-Goog-Api-Key", googlePlacesKey);
+            });
+            services.AddScoped<IPlaceProvider>(sp =>
+            {
+                var googleProvider = sp.GetRequiredService<GooglePlaceProvider>();
+                var logger = sp.GetRequiredService<IPlaceProviderRequestLogRepository>();
+                var currentUserService = sp.GetRequiredService<ICurrentUserService>();
+
+                return new LoggingGooglePlaceProviderDecorator(googleProvider, logger, currentUserService);
             });
             services.AddScoped<IPlaceRepository, PlaceRepository>();
 

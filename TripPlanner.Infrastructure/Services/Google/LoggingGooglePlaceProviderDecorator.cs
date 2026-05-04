@@ -1,0 +1,77 @@
+﻿using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Models;
+using TripPlanner.Domain.Entities;
+using TripPlanner.Domain.Enums;
+
+namespace TripPlanner.Infrastructure.Services.Google
+{
+    public class LoggingGooglePlaceProviderDecorator : IPlaceProvider
+    {
+        private readonly IPlaceProvider _placeProvider;
+        private readonly IPlaceProviderRequestLogRepository _logRepository;
+        private readonly ICurrentUserService _currentUserService;
+
+        public LoggingGooglePlaceProviderDecorator(IPlaceProvider placeProvider, IPlaceProviderRequestLogRepository logRepository, ICurrentUserService currentUserService)
+        {
+            _placeProvider = placeProvider;
+            _logRepository = logRepository;
+            _currentUserService = currentUserService;
+        }
+
+        public async Task<List<PlaceAutoCompleteResult>> AutoCompleteAsync(string query)
+        {
+            return await ExecuteMethod(() => _placeProvider.AutoCompleteAsync(query), PlaceProviderEndpointType.AutoCompleteRequests);
+        }
+
+        public async Task<PlaceResult> GetPlaceAsync(string externalPlaceId)
+        {
+            return await ExecuteMethod(() => _placeProvider.GetPlaceAsync(externalPlaceId), PlaceProviderEndpointType.PlaceDetailsEnterprise);
+        }
+
+        public async Task<string> GetPlacePhotoAsync(string photoName)
+        {
+            return await ExecuteMethod(() => _placeProvider.GetPlacePhotoAsync(photoName), PlaceProviderEndpointType.PlaceDetailsPhotos);
+        }
+
+        public async Task<List<PlaceResult>> NearbySearchPlacesAsync(decimal latitude, decimal longitude)
+        {
+            return await ExecuteMethod(() => _placeProvider.NearbySearchPlacesAsync(latitude, longitude), PlaceProviderEndpointType.NearbySearchEnterprise);
+        }
+
+        public async Task<List<PlaceResult>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query)
+        {
+            return await ExecuteMethod(() => _placeProvider.TextSearchPlacesAsync(latitude, longitude, query), PlaceProviderEndpointType.TextSearchEnterprise);
+        }
+
+        private async Task<T> ExecuteMethod<T>(Func<Task<T>> method, PlaceProviderEndpointType endpointType)
+        {
+            PlaceProviderRequestLog log = new PlaceProviderRequestLog
+            {
+                Provider = PlaceProvider.GooglePlacesAPI,
+                EndpointType = endpointType,
+                UserId = _currentUserService.UserId,
+            };
+
+            try
+            {
+                var result = await method();
+
+                log.Succeeded = true;
+                log.DurationMs = (int)(DateTime.UtcNow - log.RequestedAt).TotalMilliseconds;
+
+                return result;
+            }
+            catch
+            {
+                log.Succeeded = false;
+                log.DurationMs = (int)(DateTime.UtcNow - log.RequestedAt).TotalMilliseconds;
+
+                throw;
+            }
+            finally
+            {
+                await _logRepository.AddAsync(log);
+            }
+        }
+    }
+}

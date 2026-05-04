@@ -28,6 +28,11 @@ namespace TripPlanner.Application.Services
         public async Task<GetPlaceResponse> GetByExternalIdAsync(string externalId)
         {
             var placeResult = await _placeProvider.GetPlaceAsync(externalId);
+
+            // Costs optimization - when getting the place for the trip destination there is no need to get its photos as they aren't used.
+            var photoTasks = placeResult.Photos.Take(5).Select(async (p) => await _placeProvider.GetPlacePhotoAsync(p.Name));
+            var photos = await Task.WhenAll(photoTasks);
+
             return new GetPlaceResponse
             {
                 ExternalId = placeResult.Id,
@@ -38,7 +43,7 @@ namespace TripPlanner.Application.Services
                 Latitude = placeResult.Latitude,
                 Longitude = placeResult.Longitude,
                 WebsiteUri = placeResult.WebsiteUri,
-                PhotoUrls = await _placeProvider.GetPlacePhotosAsync(placeResult.Photos.Take(5).Select(p => p.Name).ToList()),
+                PhotoUrls = photos.ToList(),
                 UserRatingCount = placeResult.UserRatingCount,
                 Rating = placeResult.Rating,
                 PrimaryTypeDisplayName = placeResult.PrimaryTypeDisplayName

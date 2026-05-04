@@ -16,6 +16,11 @@ namespace TripPlanner.Infrastructure.Services.Google
             _httpClient = httpClient;
         }
 
+        /// <summary>
+        /// This Google Places API uses Autocomplete Requests SKU which has 10000 free usage cap and costs $2.83 per 1000 requests (0.00283 per request)
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
         public async Task<List<PlaceAutoCompleteResult>> AutoCompleteAsync(string query)
         {
             var body = new
@@ -30,7 +35,8 @@ namespace TripPlanner.Infrastructure.Services.Google
             {
                 Content = new StringContent(json, Encoding.UTF8, "application/json")
             };
-            requestMessage.Headers.Add("X-Goog-FieldMask", "suggestions.placePrediction.placeId,suggestions.placePrediction.structuredFormat.*");
+            string fieldMask = "suggestions.placePrediction.placeId,suggestions.placePrediction.structuredFormat.*";
+            requestMessage.Headers.Add("X-Goog-FieldMask", fieldMask);
 
             HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
             response.EnsureSuccessStatusCode();
@@ -40,10 +46,20 @@ namespace TripPlanner.Infrastructure.Services.Google
             return result.ToAutoCompleteResults();
         }
 
+        /// <summary>
+        /// This Google Places API uses Place Details Enterprise SKU which has 1000 free usage cap and costs $20.00 per 1000 requests (0.02 per request)
+        /// </summary>
+        /// <param name="externalPlaceId"></param>
+        /// <returns></returns>
         public async Task<PlaceResult> GetPlaceAsync(string externalPlaceId)
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, $"v1/places/{externalPlaceId}");
-            requestMessage.Headers.Add("X-Goog-FieldMask", "id,displayName,location,addressComponents,formattedAddress,rating,websiteUri,userRatingCount,primaryTypeDisplayName,photos");
+            string essentialsIdOnlySkuFields = "id,photos";
+            string essentialsFields = "location,addressComponents,formattedAddress";
+            string proSkuFields = "displayName,primaryTypeDisplayName";
+            string enterpriseSkuFields = "rating,websiteUri,userRatingCount";
+            string fieldMask = essentialsIdOnlySkuFields + "," + essentialsFields + "," + proSkuFields + "," + enterpriseSkuFields;
+            requestMessage.Headers.Add("X-Goog-FieldMask", fieldMask);
 
             HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
             response.EnsureSuccessStatusCode();
@@ -53,26 +69,16 @@ namespace TripPlanner.Infrastructure.Services.Google
             return result.ToPlaceResult();
         }
 
-        public async Task<List<string>> GetPlacePhotosAsync(List<string> photoNames)
-        {
-            List<string> photoUrls = new List<string>();
-            foreach (var photoName in photoNames)
-            {
-                HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, $"v1/{photoName}/media?maxWidthPx=800&skipHttpRedirect=true");
-
-                HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
-                response.EnsureSuccessStatusCode();
-
-                var result = await response.Content.ReadFromJsonAsync<GooglePlacePhotoResult>();
-
-                photoUrls.Add(result.PhotoUri);
-            }
-
-            return photoUrls;
-        }
-
+        /// <summary>
+        /// This Google Places API uses Place Details Photos SKU which has 1000 free usage cap and costs $7.00 per 1000 requests (0.007 per request)
+        /// </summary>
+        /// <param name="photoName"></param>
+        /// <returns></returns>
         public async Task<string> GetPlacePhotoAsync(string photoName)
         {
+            //// Monthly quota for Google Place Photo API of 1000 requests has been reached, so temporarily return null for photo url until the quota is reset in next month
+            //return null;
+
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, $"v1/{photoName}/media?maxWidthPx=800&skipHttpRedirect=true");
 
             HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
@@ -83,6 +89,13 @@ namespace TripPlanner.Infrastructure.Services.Google
             return result.PhotoUri;
         }
 
+        /// <summary>
+        /// This Google Places API uses Text Search Enterprise SKU which has 1000 free usage cap and costs $35.00 per 1000 requests (0.035 per request)
+        /// </summary>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <param name="query"></param>
+        /// <returns></returns>
         public async Task<List<PlaceResult>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query)
         {
             var body = new
@@ -105,7 +118,12 @@ namespace TripPlanner.Infrastructure.Services.Google
             {
                 Content = new StringContent(json, Encoding.UTF8, "application/json")
             };
-            requestMessage.Headers.Add("X-Goog-FieldMask", "places.id,places.displayName,places.priceLevel,places.location,places.rating,places.priceRange,places.userRatingCount,places.websiteUri,places.primaryTypeDisplayName,places.addressComponents,places.photos");
+
+            string essentialsIdOnlySkuFields = "places.id";
+            string proSkuFields = "places.displayName,places.location,places.primaryTypeDisplayName,places.addressComponents,places.photos";
+            string enterpriseSkuFields = "places.priceLevel,places.rating,places.priceRange,places.userRatingCount,places.websiteUri";
+            string fieldMask = essentialsIdOnlySkuFields + "," + proSkuFields + "," + enterpriseSkuFields;
+            requestMessage.Headers.Add("X-Goog-FieldMask", fieldMask);
 
             HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
             response.EnsureSuccessStatusCode();
@@ -120,7 +138,13 @@ namespace TripPlanner.Infrastructure.Services.Google
 
             return returnResult;
         }
-        
+
+        /// <summary>
+        /// This Google Places API uses Nearby Search Enterprise SKU which has 1000 free usage cap and costs $35.00 per 1000 requests (0.035 per request)
+        /// </summary>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <returns></returns>
         public async Task<List<PlaceResult>> NearbySearchPlacesAsync(decimal latitude, decimal longitude)
         {
             var body = new
@@ -142,7 +166,10 @@ namespace TripPlanner.Infrastructure.Services.Google
             {
                 Content = new StringContent(json, Encoding.UTF8, "application/json")
             };
-            requestMessage.Headers.Add("X-Goog-FieldMask", "places.id,places.displayName,places.priceLevel,places.location,places.priceRange,places.rating,places.userRatingCount");
+            string proSkuFields = "places.id,places.displayName,places.location";
+            string enterpriseSkuFields = "places.priceLevel,places.priceRange,places.rating,places.userRatingCount";
+            string fieldMask = proSkuFields + "," + enterpriseSkuFields;
+            requestMessage.Headers.Add("X-Goog-FieldMask", fieldMask);
 
             HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
             string rs = await response.Content.ReadAsStringAsync();
