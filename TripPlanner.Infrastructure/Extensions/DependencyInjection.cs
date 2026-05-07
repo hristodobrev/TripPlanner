@@ -64,7 +64,8 @@ namespace TripPlanner.Infrastructure.Extensions
 
             services.AddScoped<IPlaceService, PlaceService>();
             services.AddScoped<IPlaceProviderRequestLogRepository, PlaceProviderRequestLogRepository>();
-            services.AddHttpClient<GooglePlaceProvider>(client =>
+            // TODO: Mocking up the Google Places API during development, will replace with real API calls later
+            services.AddHttpClient<TestPlaceProvider>(client =>
             {
                 client.BaseAddress = new Uri("https://places.googleapis.com/");
                 var googlePlacesKey = configuration["GooglePlaces:ApiKey"];
@@ -72,7 +73,7 @@ namespace TripPlanner.Infrastructure.Extensions
             });
             services.AddScoped<IPlaceProvider>(sp =>
             {
-                var googleProvider = sp.GetRequiredService<GooglePlaceProvider>();
+                var googleProvider = sp.GetRequiredService<TestPlaceProvider>();
                 var logger = sp.GetRequiredService<IPlaceProviderRequestLogRepository>();
                 var currentUserService = sp.GetRequiredService<ICurrentUserService>();
 
