@@ -14,9 +14,9 @@ namespace TripPlanner.Application.Services
             _placeRepository = placeRepository;
         }
 
-        public async Task<List<PlaceAutoCompleteResponse>> AutoCompleteAsync(string query)
+        public async Task<List<PlaceAutoCompleteResponse>> AutoCompleteAsync(string query, CancellationToken cancellationToken)
         {
-            var result = await _placeProvider.AutoCompleteAsync(query);
+            var result = await _placeProvider.AutoCompleteAsync(query, cancellationToken);
 
             return result.Select(r => new PlaceAutoCompleteResponse
             {
@@ -25,12 +25,12 @@ namespace TripPlanner.Application.Services
                 SecondaryText = r.SecondaryText
             }).ToList();
         }
-        public async Task<GetPlaceResponse> GetByExternalIdAsync(string externalId)
+        public async Task<GetPlaceResponse> GetByExternalIdAsync(string externalId, CancellationToken cancellationToken)
         {
-            var placeResult = await _placeProvider.GetPlaceAsync(externalId);
+            var placeResult = await _placeProvider.GetPlaceAsync(externalId, cancellationToken);
 
             // Costs optimization - when getting the place for the trip destination there is no need to get its photos as they aren't used.
-            var photoTasks = placeResult.Photos.Take(5).Select(async (p) => await _placeProvider.GetPlacePhotoAsync(p.Name));
+            var photoTasks = placeResult.Photos.Take(5).Select(async (p) => await _placeProvider.GetPlacePhotoAsync(p.Name, cancellationToken));
             var photos = await Task.WhenAll(photoTasks);
 
             return new GetPlaceResponse
@@ -40,7 +40,7 @@ namespace TripPlanner.Application.Services
                 Name = placeResult.Name,
                 Country = placeResult.Country,
                 Locality = placeResult.Locality,
-                Latitude = placeResult.Latitude,
+                Latitude = placeResult.Latitude,    
                 Longitude = placeResult.Longitude,
                 WebsiteUri = placeResult.WebsiteUri,
                 PhotoUrls = photos.ToList(),
@@ -50,14 +50,14 @@ namespace TripPlanner.Application.Services
             };
         }
 
-        public async Task<IEnumerable<PlaceDetailsResponse>> GetPlacesForTripWithDetailsAsync(Guid tripId)
+        public async Task<IEnumerable<PlaceDetailsResponse>> GetPlacesForTripWithDetailsAsync(Guid tripId, CancellationToken cancellationToken)
         {
-            var places = await _placeRepository.GetByTripIdAsync(tripId);
+            var places = await _placeRepository.GetByTripIdAsync(tripId, cancellationToken);
 
             List<PlaceDetailsResponse> placeResponses = new List<PlaceDetailsResponse>();
             foreach (var place in places)
             {
-                var placeResult = await _placeProvider.GetPlaceAsync(place.ExternalId!);
+                var placeResult = await _placeProvider.GetPlaceAsync(place.ExternalId!, cancellationToken);
                 placeResponses.Add(new PlaceDetailsResponse
                 {
                     Id = place.Id,
@@ -83,9 +83,9 @@ namespace TripPlanner.Application.Services
             return placeResponses;
         }
 
-        public async Task<IEnumerable<PlaceTextSearchResponse>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query)
+        public async Task<IEnumerable<PlaceTextSearchResponse>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query, CancellationToken cancellationToken)
         {
-            var placesResult = await _placeProvider.TextSearchPlacesAsync(latitude, longitude, query);
+            var placesResult = await _placeProvider.TextSearchPlacesAsync(latitude, longitude, query, cancellationToken);
 
             var places = new List<PlaceTextSearchResponse>();
             foreach (var placeResult in placesResult)
@@ -102,16 +102,16 @@ namespace TripPlanner.Application.Services
                     UserRatingCount = placeResult.UserRatingCount,
                     Rating = placeResult.Rating,
                     PrimaryTypeDisplayName = placeResult.PrimaryTypeDisplayName,
-                    PhotoUrl = await _placeProvider.GetPlacePhotoAsync(placeResult.Photos.Take(1).Select(p => p.Name).FirstOrDefault())
+                    PhotoUrl = await _placeProvider.GetPlacePhotoAsync(placeResult.Photos.Take(1).Select(p => p.Name).FirstOrDefault(), cancellationToken)
                 });
             }
 
             return places;
         }
 
-        public async Task<IEnumerable<PlaceNearbySearchResponse>> NearbySearchPlacesAsync(decimal latitude, decimal longitude)
+        public async Task<IEnumerable<PlaceNearbySearchResponse>> NearbySearchPlacesAsync(decimal latitude, decimal longitude, CancellationToken cancellationToken)
         {
-            var placesResult = await _placeProvider.NearbySearchPlacesAsync(latitude, longitude);
+            var placesResult = await _placeProvider.NearbySearchPlacesAsync(latitude, longitude, cancellationToken);
 
             var places = new List<PlaceNearbySearchResponse>();
             foreach (var placeResult in placesResult)

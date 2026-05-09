@@ -14,12 +14,12 @@ namespace TripPlanner.Infrastructure.Repositories
             _dbContextFactory = dbContextFactory;
         }
 
-        public async Task AddAsync(PlaceProviderRequestLog log)
+        public async Task AddAsync(PlaceProviderRequestLog log, CancellationToken cancellationToken)
         {
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
-            await dbContext.PlaceProviderRequestLogs.AddAsync(log);
-            await dbContext.SaveChangesAsync();
+            await dbContext.PlaceProviderRequestLogs.AddAsync(log, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 }

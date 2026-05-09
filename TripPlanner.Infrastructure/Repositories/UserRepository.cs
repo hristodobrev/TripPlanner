@@ -23,5 +23,12 @@ namespace TripPlanner.Infrastructure.Repositories
         {
             return _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
         }
+
+        public async Task<IEnumerable<User>> SearchAsync(string keyword, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Users
+                .Where(u => u.FirstName.Contains(keyword) || u.LastName.Contains(keyword) || u.Email.Contains(keyword))
+                .ToListAsync(cancellationToken);
+        }
     }
 }

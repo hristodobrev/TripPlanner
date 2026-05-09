@@ -13,24 +13,33 @@ namespace TripPlanner.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task AddAsync(Trip trip)
+        public async Task AddAsync(Trip trip, CancellationToken cancellationToken)
         {
-            await _dbContext.Trips.AddAsync(trip);
+            await _dbContext.Trips.AddAsync(trip, cancellationToken);
         }
 
-        public async Task<Trip?> GetByIdForUserAsync(Guid id, Guid userId)
+        public async Task<Trip?> GetByIdAsync(Guid id,  CancellationToken cancellationToken)
+        {
+            return await _dbContext.Trips
+                .Where(t => t.Id == id)
+                .Include(t => t.Places.OrderBy(p => p.Order))
+                .Include(t => t.TripShares)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task<Trip?> GetByIdForUserAsync(Guid id, Guid userId, CancellationToken cancellationToken)
         {
             return await _dbContext.Trips
                 .Where(t => t.Id == id && t.UserId == userId)
                 .Include(t => t.Places.OrderBy(p => p.Order))
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<Trip>> GetByUserIdAsync(Guid userId)
+        public async Task<IEnumerable<Trip>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
         {
             return await _dbContext.Trips
                 .Where(t => t.UserId == userId)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
 
         public void Remove(Trip trip)

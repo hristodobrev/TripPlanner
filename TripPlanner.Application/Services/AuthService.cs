@@ -1,5 +1,6 @@
 ﻿using TripPlanner.Application.DTOs.Request;
 using TripPlanner.Application.DTOs.Response;
+using TripPlanner.Application.Exceptions;
 using TripPlanner.Application.Interfaces;
 using TripPlanner.Domain.Entities;
 
@@ -20,13 +21,13 @@ namespace TripPlanner.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
+        public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
 
             if (user == null || string.IsNullOrEmpty(user.PasswordHash) || !_passwordHasher.Verify(request.Password, user.PasswordHash))
             {
-                throw new InvalidOperationException("Incorrect username or password");
+                throw new BadRequestException("Incorrect username or password");
             }
 
             var token = _jwtTokenService.GenerateToken(user);
@@ -41,13 +42,13 @@ namespace TripPlanner.Application.Services
             };
         }
 
-        public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
+        public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken)
         {
             var existingUser = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
 
             if (existingUser != null)
             {
-                throw new InvalidOperationException("Email is already registered.");
+                throw new BadRequestException("Email is already registered.");
             }
 
             var user = new User

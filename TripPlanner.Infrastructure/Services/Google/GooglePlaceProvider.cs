@@ -21,7 +21,7 @@ namespace TripPlanner.Infrastructure.Services.Google
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        public async Task<List<PlaceAutoCompleteResult>> AutoCompleteAsync(string query)
+        public async Task<List<PlaceAutoCompleteResult>> AutoCompleteAsync(string query, CancellationToken cancellationToken)
         {
             var body = new
             {
@@ -38,10 +38,10 @@ namespace TripPlanner.Infrastructure.Services.Google
             string fieldMask = "suggestions.placePrediction.placeId,suggestions.placePrediction.structuredFormat.*";
             requestMessage.Headers.Add("X-Goog-FieldMask", fieldMask);
 
-            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
+            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage, cancellationToken);
             response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadFromJsonAsync<GooglePlaceAutoCompleteResult>();
+            var result = await response.Content.ReadFromJsonAsync<GooglePlaceAutoCompleteResult>(cancellationToken);
 
             return result.ToAutoCompleteResults();
         }
@@ -51,20 +51,20 @@ namespace TripPlanner.Infrastructure.Services.Google
         /// </summary>
         /// <param name="externalPlaceId"></param>
         /// <returns></returns>
-        public async Task<PlaceResult> GetPlaceAsync(string externalPlaceId)
+        public async Task<PlaceResult> GetPlaceAsync(string externalPlaceId, CancellationToken cancellationToken)
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, $"v1/places/{externalPlaceId}");
             string essentialsIdOnlySkuFields = "id,photos";
             string essentialsFields = "location,addressComponents,formattedAddress";
             string proSkuFields = "displayName,primaryTypeDisplayName";
-            string enterpriseSkuFields = "rating,websiteUri,userRatingCount";
+            string enterpriseSkuFields = "rating,websiteUri,userRatingCount";   
             string fieldMask = essentialsIdOnlySkuFields + "," + essentialsFields + "," + proSkuFields + "," + enterpriseSkuFields;
             requestMessage.Headers.Add("X-Goog-FieldMask", fieldMask);
 
-            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
+            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage, cancellationToken);
             response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadFromJsonAsync<GooglePlaceResult>();
+            var result = await response.Content.ReadFromJsonAsync<GooglePlaceResult>(cancellationToken);
 
             return result.ToPlaceResult();
         }
@@ -74,14 +74,14 @@ namespace TripPlanner.Infrastructure.Services.Google
         /// </summary>
         /// <param name="photoName"></param>
         /// <returns></returns>
-        public async Task<string> GetPlacePhotoAsync(string photoName)
+        public async Task<string> GetPlacePhotoAsync(string photoName, CancellationToken cancellationToken)
         {
             //// Monthly quota for Google Place Photo API of 1000 requests has been reached, so temporarily return null for photo url until the quota is reset in next month
             //return null;
 
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, $"v1/{photoName}/media?maxWidthPx=800&skipHttpRedirect=true");
 
-            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
+            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<GooglePlacePhotoResult>();
@@ -96,7 +96,7 @@ namespace TripPlanner.Infrastructure.Services.Google
         /// <param name="longitude"></param>
         /// <param name="query"></param>
         /// <returns></returns>
-        public async Task<List<PlaceResult>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query)
+        public async Task<List<PlaceResult>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query, CancellationToken cancellationToken)
         {
             var body = new
             {
@@ -125,7 +125,7 @@ namespace TripPlanner.Infrastructure.Services.Google
             string fieldMask = essentialsIdOnlySkuFields + "," + proSkuFields + "," + enterpriseSkuFields;
             requestMessage.Headers.Add("X-Goog-FieldMask", fieldMask);
 
-            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
+            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<GooglePlaceTextSearchResult>();
@@ -145,7 +145,7 @@ namespace TripPlanner.Infrastructure.Services.Google
         /// <param name="latitude"></param>
         /// <param name="longitude"></param>
         /// <returns></returns>
-        public async Task<List<PlaceResult>> NearbySearchPlacesAsync(decimal latitude, decimal longitude)
+        public async Task<List<PlaceResult>> NearbySearchPlacesAsync(decimal latitude, decimal longitude, CancellationToken cancellationToken)
         {
             var body = new
             {
@@ -171,11 +171,11 @@ namespace TripPlanner.Infrastructure.Services.Google
             string fieldMask = proSkuFields + "," + enterpriseSkuFields;
             requestMessage.Headers.Add("X-Goog-FieldMask", fieldMask);
 
-            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage);
-            string rs = await response.Content.ReadAsStringAsync();
+            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage, cancellationToken);
+            string rs = await response.Content.ReadAsStringAsync(cancellationToken);
             response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadFromJsonAsync<GooglePlaceTextSearchResult>();
+            var result = await response.Content.ReadFromJsonAsync<GooglePlaceTextSearchResult>(cancellationToken);
 
             var returnResult = new List<PlaceResult>();
             foreach (var item in result.Places)

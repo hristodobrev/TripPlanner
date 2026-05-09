@@ -18,32 +18,32 @@ namespace TripPlanner.Infrastructure.Services.Google
             _currentUserService = currentUserService;
         }
 
-        public async Task<List<PlaceAutoCompleteResult>> AutoCompleteAsync(string query)
+        public async Task<List<PlaceAutoCompleteResult>> AutoCompleteAsync(string query, CancellationToken cancellationToken)
         {
-            return await ExecuteMethod(() => _placeProvider.AutoCompleteAsync(query), PlaceProviderEndpointType.AutoCompleteRequests);
+            return await ExecuteMethod(() => _placeProvider.AutoCompleteAsync(query, cancellationToken), PlaceProviderEndpointType.AutoCompleteRequests, cancellationToken);
         }
 
-        public async Task<PlaceResult> GetPlaceAsync(string externalPlaceId)
+        public async Task<PlaceResult> GetPlaceAsync(string externalPlaceId, CancellationToken cancellationToken)
         {
-            return await ExecuteMethod(() => _placeProvider.GetPlaceAsync(externalPlaceId), PlaceProviderEndpointType.PlaceDetailsEnterprise);
+            return await ExecuteMethod(() => _placeProvider.GetPlaceAsync(externalPlaceId, cancellationToken), PlaceProviderEndpointType.PlaceDetailsEnterprise, cancellationToken);
         }
 
-        public async Task<string> GetPlacePhotoAsync(string photoName)
+        public async Task<string> GetPlacePhotoAsync(string photoName, CancellationToken cancellationToken)
         {
-            return await ExecuteMethod(() => _placeProvider.GetPlacePhotoAsync(photoName), PlaceProviderEndpointType.PlaceDetailsPhotos);
+            return await ExecuteMethod(() => _placeProvider.GetPlacePhotoAsync(photoName, cancellationToken), PlaceProviderEndpointType.PlaceDetailsPhotos, cancellationToken);
         }
 
-        public async Task<List<PlaceResult>> NearbySearchPlacesAsync(decimal latitude, decimal longitude)
+        public async Task<List<PlaceResult>> NearbySearchPlacesAsync(decimal latitude, decimal longitude, CancellationToken cancellationToken)
         {
-            return await ExecuteMethod(() => _placeProvider.NearbySearchPlacesAsync(latitude, longitude), PlaceProviderEndpointType.NearbySearchEnterprise);
+            return await ExecuteMethod(() => _placeProvider.NearbySearchPlacesAsync(latitude, longitude, cancellationToken), PlaceProviderEndpointType.NearbySearchEnterprise, cancellationToken);
         }
 
-        public async Task<List<PlaceResult>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query)
+        public async Task<List<PlaceResult>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query, CancellationToken cancellationToken)
         {
-            return await ExecuteMethod(() => _placeProvider.TextSearchPlacesAsync(latitude, longitude, query), PlaceProviderEndpointType.TextSearchEnterprise);
+            return await ExecuteMethod(() => _placeProvider.TextSearchPlacesAsync(latitude, longitude, query, cancellationToken), PlaceProviderEndpointType.TextSearchEnterprise, cancellationToken);
         }
 
-        private async Task<T> ExecuteMethod<T>(Func<Task<T>> method, PlaceProviderEndpointType endpointType)
+        private async Task<T> ExecuteMethod<T>(Func<Task<T>> method, PlaceProviderEndpointType endpointType, CancellationToken cancellationToken)
         {
             PlaceProviderRequestLog log = new PlaceProviderRequestLog
             {
@@ -70,7 +70,7 @@ namespace TripPlanner.Infrastructure.Services.Google
             }
             finally
             {
-                await _logRepository.AddAsync(log);
+                await _logRepository.AddAsync(log, cancellationToken);
             }
         }
     }

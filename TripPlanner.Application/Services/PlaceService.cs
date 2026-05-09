@@ -1,5 +1,6 @@
 ﻿using TripPlanner.Application.DTOs.Request;
 using TripPlanner.Application.DTOs.Response;
+using TripPlanner.Application.Exceptions;
 using TripPlanner.Application.Interfaces;
 using TripPlanner.Domain.Entities;
 
@@ -18,9 +19,9 @@ namespace TripPlanner.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<TripPlaceResponse>> GetPlacesForTripAsync(Guid tripId)
+        public async Task<IEnumerable<TripPlaceResponse>> GetPlacesForTripAsync(Guid tripId, CancellationToken cancellationToken)
         {
-            var places = await _placeRepository.GetByTripIdAsync(tripId);
+            var places = await _placeRepository.GetByTripIdAsync(tripId, cancellationToken);
 
             return places.Select(place => new TripPlaceResponse
             {
@@ -34,99 +35,90 @@ namespace TripPlanner.Application.Services
             });
         }
 
-        public async Task<Guid> AddAsync(AddPlaceRequest request, Guid userId)
+        public async Task<Guid> AddAsync(AddPlaceRequest request, Guid userId, CancellationToken cancellationToken)
         {
-            var trip = await _tripRepository.GetByIdForUserAsync(request.TripId!.Value, userId);
-            if (trip == null)
-            {
-                throw new InvalidOperationException("Trip not found");
-            }
-
+            var trip = await _tripRepository.GetByIdAsync(request.TripId!.Value, cancellationToken);
+            CheckAccess(trip, userId);
+            
             var place = new Place
             {
                 ExternalId = request.ExternalId,
                 TripId = request.TripId!.Value,
                 Name = request.Name
             };
-            await _placeRepository.AddAsync(place);
+            await _placeRepository.AddAsync(place, cancellationToken);
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return place.Id;
         }
 
-        public async Task RemoveAsync(Guid placeId, Guid userId)
+        public async Task RemoveAsync(Guid placeId, Guid userId, CancellationToken cancellationToken)
         {
-            var place = await _placeRepository.GetByIdAsync(placeId);
+            var place = await _placeRepository.GetByIdAsync(placeId, cancellationToken);
             if (place == null)
             {
-                throw new InvalidOperationException("Place not found");
+                throw new NotFoundException("Place not found");
             }
 
-            var trip = await _tripRepository.GetByIdForUserAsync(place.TripId, userId);
-            if (trip == null)
-            {
-                throw new InvalidOperationException("Trip not found");
-            }
+            var trip = await _tripRepository.GetByIdAsync(place.TripId, cancellationToken);
+            CheckAccess(trip, userId);
 
             _placeRepository.Remove(place);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateAsync(Guid id, UpdatePlaceRequest request, Guid userId)
+        public async Task UpdateAsync(Guid id, UpdatePlaceRequest request, Guid userId, CancellationToken cancellationToken)
         {
-            var place = await _placeRepository.GetByIdAsync(id);
+            var place = await _placeRepository.GetByIdAsync(id, cancellationToken);
 
             if (place == null)
             {
-                throw new InvalidOperationException("Place not found");
+                throw new NotFoundException("Place not found");
             }
 
             place.Note = request.Note;
             place.DurationMinues = request.DurationMinutes;
             place.PlannedTime = request.PlannedTime;
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateStatusAsync(Guid id, UpdatePlaceStatusRequest request, Guid userId)
+        public async Task UpdateStatusAsync(Guid id, UpdatePlaceStatusRequest request, Guid userId, CancellationToken cancellationToken)
         {
-            var place = await _placeRepository.GetByIdAsync(id);
+            var place = await _placeRepository.GetByIdAsync(id, cancellationToken);
 
             if (place == null)
             {
-                throw new InvalidOperationException("Place not found");
+                throw new NotFoundException("Place not found");
             }
 
             place.Status = request.Status;
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task ReorderAsync(ReorderPlacesRequest request, Guid userId)
+        public async Task ReorderAsync(ReorderPlacesRequest request, Guid userId, CancellationToken cancellationToken)
         {
-            var trip = await _tripRepository.GetByIdForUserAsync(request.TripId!.Value, userId);
-            if (trip == null)
-            {
-                throw new InvalidOperationException("Trip not found");
-            }
+            var trip = await _tripRepository.GetByIdAsync(request.TripId!.Value, cancellationToken);
+            CheckAccess(trip, userId);
 
-            var sourcePlace = await _placeRepository.GetByIdAsync(request.SourceId!.Value);
+            var sourcePlace = await _placeRepository.GetByIdAsync(request.SourceId!.Value, cancellationToken);
             if (sourcePlace == null || sourcePlace.TripId != request.TripId)
             {
-                throw new InvalidOperationException("Place not found in the specified trip");
+                throw new NotFoundException("Place not found in the specified trip");
             }
 
             Place? targetPlace = null;
             if (request.TargetId != null)
             {
-                targetPlace = await _placeRepository.GetByIdAsync(request.TargetId.Value);
+                targetPlace = await _placeRepository.GetByIdAsync(request.TargetId.Value, cancellationToken);
                 if (targetPlace == null || targetPlace.TripId != request.TripId)
                 {
-                    throw new InvalidOperationException("Place not found in the specified trip");
+                    throw new NotFoundException("Place not found in the specified trip");
                 }
 
-                var places = await _placeRepository.GetByTripIdAndDayNumberAsync(request.TripId.Value, targetPlace.DayNumber);
+                var places = await _placeRepository.GetByTripIdAndDayNumberAsync(request.TripId.Value, targetPlace.DayNumber, cancellationToken);
                 int targetOrder = targetPlace.Order;
                 if (targetPlace.Order > sourcePlace.Order)
                 {
@@ -159,12 +151,25 @@ namespace TripPlanner.Application.Services
             }
             else if (sourcePlace.DayNumber != request.DayNumber)
             {
-                sourcePlace.Order = await _placeRepository.GetMaxOrderForDay(request.TripId!.Value, request.DayNumber) + 1;
+                sourcePlace.Order = await _placeRepository.GetMaxOrderForDayAsync(request.TripId!.Value, request.DayNumber, cancellationToken) + 1;
             }
 
             sourcePlace.DayNumber = request.DayNumber;
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        private void CheckAccess(Trip? trip, Guid userId)
+        {
+            if (trip == null)
+            {
+                throw new NotFoundException("Trip not found");
+            }
+
+            if (trip.UserId != userId && !(trip.TripShares?.Any(t => t.UserId == userId) ?? false))
+            {
+                throw new ForbiddenException("Access denied");
+            }
         }
     }
 }

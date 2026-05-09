@@ -56,6 +56,7 @@ namespace TripPlanner.Infrastructure.Extensions
             services.AddScoped<IPasswordHasher, PasswordHasher>();
 
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUserRepository, UserRepository>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -83,6 +84,9 @@ namespace TripPlanner.Infrastructure.Extensions
 
             services.AddScoped<ITripService, TripService>();
             services.AddScoped<ITripRepository, TripRepository>();
+
+            services.AddScoped<ITripShareService, TripShareService>();
+            services.AddScoped<ITripShareRepository, TripShareRepository>();
 
             return services;
         }

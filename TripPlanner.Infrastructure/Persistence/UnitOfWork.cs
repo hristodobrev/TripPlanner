@@ -1,5 +1,4 @@
 ﻿using TripPlanner.Application.Interfaces;
-using TripPlanner.Infrastructure.Persistence;
 
 namespace TripPlanner.Infrastructure.Persistence
 {
@@ -12,7 +11,7 @@ namespace TripPlanner.Infrastructure.Persistence
             _dbContext = dbContext;
         }
 
-        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
             => _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

@@ -17,25 +17,15 @@ namespace TripPlanner.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<AuthResponse> Register(RegisterRequest model)
+        public async Task<AuthResponse> Register(RegisterRequest model, CancellationToken cancellationToken)
         {
-            // TODO: Add validation and error handling
-
-            return await _authService.RegisterAsync(model);
+            return await _authService.RegisterAsync(model, cancellationToken);
         }
 
         [HttpPost("login")]
-        public async Task<AuthResponse> Login(LoginRequest model)
+        public async Task<AuthResponse> Login(LoginRequest model, CancellationToken cancellationToken)
         {
-            // TODO: Add validation and error handling
-
-            return await _authService.LoginAsync(model);
-        }
-
-        [HttpGet]
-        public AuthResponse Me()
-        {
-            throw new NotImplementedException();
+            return await _authService.LoginAsync(model, cancellationToken);
         }
     }
 }

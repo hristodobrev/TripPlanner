@@ -17,7 +17,7 @@ namespace TripPlanner.Infrastructure.Services.Google
         {
             _httpClient = httpClient;
         }
-        public Task<List<PlaceAutoCompleteResult>> AutoCompleteAsync(string query)
+        public Task<List<PlaceAutoCompleteResult>> AutoCompleteAsync(string query, CancellationToken cancellationToken)
         {
             string mockedResponse = File.ReadAllText("D:/Trip-Planner-Data/autocomplete-data.json");
             var result = JsonSerializer.Deserialize<GooglePlaceAutoCompleteResult>(mockedResponse, options);
@@ -25,7 +25,7 @@ namespace TripPlanner.Infrastructure.Services.Google
             return Task.FromResult(result.ToAutoCompleteResults());
         }
 
-        public Task<PlaceResult> GetPlaceAsync(string externalPlaceId)
+        public Task<PlaceResult> GetPlaceAsync(string externalPlaceId, CancellationToken cancellationToken)
         {
             string mockedResponse = File.ReadAllText("D:/Trip-Planner-Data/places-data.json");
             var result = JsonSerializer.Deserialize<GooglePlaceTextSearchResult>(mockedResponse, options);
@@ -34,7 +34,7 @@ namespace TripPlanner.Infrastructure.Services.Google
             return Task.FromResult(place.ToPlaceResult());
         }
 
-        public Task<string> GetPlacePhotoAsync(string photoName)
+        public Task<string> GetPlacePhotoAsync(string photoName, CancellationToken cancellationToken)
         {
             string mockedResponse = File.ReadAllText("D:/Trip-Planner-Data/photos-data.json");
             var result = JsonSerializer.Deserialize<GooglePlacePhotoResult>(mockedResponse, options);
@@ -42,7 +42,7 @@ namespace TripPlanner.Infrastructure.Services.Google
             return Task.FromResult(result.PhotoUri);
         }
 
-        public Task<List<PlaceResult>> NearbySearchPlacesAsync(decimal latitude, decimal longitude)
+        public Task<List<PlaceResult>> NearbySearchPlacesAsync(decimal latitude, decimal longitude, CancellationToken cancellationToken)
         {
             string mockedResponse = File.ReadAllText("D:/Trip-Planner-Data/places-data.json");
             var result = JsonSerializer.Deserialize<GooglePlaceTextSearchResult>(mockedResponse, options);
@@ -56,7 +56,7 @@ namespace TripPlanner.Infrastructure.Services.Google
             return Task.FromResult(returnResult);
         }
 
-        public Task<List<PlaceResult>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query)
+        public Task<List<PlaceResult>> TextSearchPlacesAsync(decimal latitude, decimal longitude, string query, CancellationToken cancellationToken)
         {
             string mockedResponse = File.ReadAllText("D:/Trip-Planner-Data/places-data.json");
             var result = JsonSerializer.Deserialize<GooglePlaceTextSearchResult>(mockedResponse, options);

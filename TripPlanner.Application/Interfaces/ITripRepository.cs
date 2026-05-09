@@ -4,9 +4,10 @@ namespace TripPlanner.Application.Interfaces
 {
     public interface ITripRepository
     {
-        Task AddAsync(Trip trip);
+        Task AddAsync(Trip trip, CancellationToken cancellationToken);
         void Remove(Trip trip);
-        Task<Trip?> GetByIdForUserAsync(Guid id, Guid userId);
-        Task<IEnumerable<Trip>> GetByUserIdAsync(Guid userId);
+        Task<Trip?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<Trip?> GetByIdForUserAsync(Guid id, Guid userId, CancellationToken cancellationToken);
+        Task<IEnumerable<Trip>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
     }
 }

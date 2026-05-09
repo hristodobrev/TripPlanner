@@ -13,6 +13,8 @@
         public string DestinationExternalId { get; set; } = null!;
         public string DestinationName { get; set; } = null!;
 
+        public IEnumerable<TripShare> TripShares { get; set; } = null!;
+
         public Guid UserId { get; set; }
         public User User { get; set; } = null!;
 

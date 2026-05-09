@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using TripPlanner.API.Extensions;
 using TripPlanner.Application.DTOs.Request;
 using TripPlanner.Application.Interfaces;
-using TripPlanner.Domain.Enums;
 
 namespace TripPlanner.API.Controllers
 {
@@ -19,44 +18,43 @@ namespace TripPlanner.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddPlace(AddPlaceRequest request)
+        public async Task<IActionResult> AddPlace(AddPlaceRequest request, CancellationToken cancellationToken)
         {
-            Guid id = await _placeService.AddAsync(request, User.GetUserId());
+            Guid id = await _placeService.AddAsync(request, User.GetUserId(), cancellationToken);
 
             return Ok(id);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePlace(Guid id, UpdatePlaceRequest request)
+        public async Task<IActionResult> UpdatePlace(Guid id, UpdatePlaceRequest request, CancellationToken cancellationToken)
         {
-            await _placeService.UpdateAsync(id, request, User.GetUserId());
+            await _placeService.UpdateAsync(id, request, User.GetUserId(), cancellationToken);
 
             return Ok();
         }
 
         [HttpPatch("{id}/status")]
-        public async Task<IActionResult> UpdatePlaceStatus(Guid id, UpdatePlaceStatusRequest request)
+        public async Task<IActionResult> UpdatePlaceStatus(Guid id, UpdatePlaceStatusRequest request, CancellationToken cancellationToken)
         {
-            await _placeService.UpdateStatusAsync(id, request, User.GetUserId());
+            await _placeService.UpdateStatusAsync(id, request, User.GetUserId(), cancellationToken);
 
             return Ok();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> RemovePlace(Guid id)
+        public async Task<IActionResult> RemovePlace(Guid id, CancellationToken cancellationToken)
         {
-            await _placeService.RemoveAsync(id, User.GetUserId());
+            await _placeService.RemoveAsync(id, User.GetUserId(), cancellationToken);
 
             return Ok();
         }
 
         [HttpPut("reorder")]
-        public async Task<IActionResult> Reorder(ReorderPlacesRequest request)
+        public async Task<IActionResult> Reorder(ReorderPlacesRequest request, CancellationToken cancellationToken)
         {
-            await _placeService.ReorderAsync(request, User.GetUserId());
+            await _placeService.ReorderAsync(request, User.GetUserId(), cancellationToken);
 
-            var places = await _placeService.GetPlacesForTripAsync(request.TripId!.Value);
-
+            var places = await _placeService.GetPlacesForTripAsync(request.TripId!.Value, cancellationToken);
             return Ok(places);
         }
     }

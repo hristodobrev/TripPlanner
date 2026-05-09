@@ -13,39 +13,49 @@ namespace TripPlanner.API.Controllers
     public class TripsController : ControllerBase
     {
         private readonly ITripService _tripService;
+        private readonly ITripShareService _tripShareService;
         public TripsController(ITripService tripService)
         {
             _tripService = tripService;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(TripRequest request)
+        public async Task<IActionResult> Post(TripRequest request, CancellationToken cancellationToken)
         {
-            Guid id = await _tripService.AddAsync(request, User.GetUserId());
+            Guid id = await _tripService.AddAsync(request, User.GetUserId(), cancellationToken);
 
             return Ok(id);
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
-            var trips = await _tripService.GetByUserIdAsync(User.GetUserId());
+            var trips = await _tripService.GetAllByUserIdAsync(User.GetUserId(), cancellationToken);
 
             return Ok(trips);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(Guid id)
+        public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
         {
-            var trip = await _tripService.GetByIdForUserAsync(id, User.GetUserId());
+            var trip = await _tripService.GetByIdForUserAsync(id, User.GetUserId(), cancellationToken);
 
             return Ok(trip);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Remove(Guid id)
+        [HttpGet("shared")]
+        public async Task<IActionResult> GetShared(CancellationToken cancellationToken)
         {
-            await _tripService.RemoveAsync(id, User.GetUserId());
+            //var trip = await _tripService.GetByIdForUserAsync(id, User.GetUserId(), cancellationToken);
+
+            //return Ok(trip);
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Remove(Guid id, CancellationToken cancellationToken)
+        {
+            await _tripService.RemoveAsync(id, User.GetUserId(), cancellationToken);
 
             return Ok();
         }
