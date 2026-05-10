@@ -3,6 +3,7 @@ using TripPlanner.Application.DTOs.Response;
 using TripPlanner.Application.Exceptions;
 using TripPlanner.Application.Interfaces;
 using TripPlanner.Domain.Entities;
+using TripPlanner.Domain.Enums;
 
 namespace TripPlanner.Application.Services
 {
@@ -166,7 +167,7 @@ namespace TripPlanner.Application.Services
                 throw new NotFoundException("Trip not found");
             }
 
-            if (trip.UserId != userId && !(trip.TripShares?.Any(t => t.UserId == userId) ?? false))
+            if (trip.UserId != userId && !(trip.TripShares?.Any(t => t.UserId == userId && t.Permission == TripPermission.Edit) ?? false))
             {
                 throw new ForbiddenException("Access denied");
             }

@@ -66,7 +66,7 @@ namespace TripPlanner.Application.Services
                     DayNumber = place.DayNumber,
                     DurationMinutes = place.DurationMinues,
                     PlannedTime = place.PlannedTime,
-                    Name = placeResult.Name,
+                    Name = place.Name, //placeResult.Name,
                     Note = place.Note,
                     Status = place.Status,
                     Country = placeResult.Country,

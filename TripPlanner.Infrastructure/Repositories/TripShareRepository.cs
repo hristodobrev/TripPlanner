@@ -25,6 +25,13 @@ namespace TripPlanner.Infrastructure.Repositories
             await _dbContext.TripShares.Where(ts => ts.Id == id).ExecuteDeleteAsync(cancellationToken);
         }
 
+        public async Task<TripShare?> GetByIdAsync(Guid tripShareId, CancellationToken cancellationToken)
+        {
+            return await _dbContext.TripShares
+                .Where(t => t.Id == tripShareId)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
         public async Task<IEnumerable<TripShare>> GetByTripIdAsync(Guid tripId, CancellationToken cancellationToken)
         {
             return await _dbContext.TripShares

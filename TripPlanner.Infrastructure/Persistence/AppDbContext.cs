@@ -12,6 +12,7 @@ namespace TripPlanner.Infrastructure.Persistence
         public DbSet<Place> Places { get; set; }
         public DbSet<TripShare> TripShares { get; set; }
         public DbSet<PlaceProviderRequestLog> PlaceProviderRequestLogs { get; set; }
+        public DbSet<PlaceProviderEndpointCost> PlaceProviderEndpointCosts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

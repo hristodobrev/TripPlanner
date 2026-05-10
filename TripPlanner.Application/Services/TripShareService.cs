@@ -59,13 +59,9 @@ namespace TripPlanner.Application.Services
         {
             await CheckAccessAsync(tripId, userId, cancellationToken);
 
-            _tripShareRepository.Update(new TripShare
-            {
-                Id = tripShareId,
-                TripId = tripId,
-                UserId = userId,
-                Permission = request.Permission,
-            });
+            var tripShareToUpdate = await _tripShareRepository.GetByIdAsync(tripShareId, cancellationToken);
+            tripShareToUpdate?.Permission = request.Permission;
+
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
