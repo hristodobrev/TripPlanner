@@ -44,6 +44,7 @@ namespace TripPlanner.Infrastructure.Repositories
         {
             return await _dbContext.Places
                 .Where(p => p.TripId == tripId)
+                .Include(p => p.PlaceDetails)
                 .OrderBy(p => p.Order)
                 .ToListAsync(cancellationToken);
         }

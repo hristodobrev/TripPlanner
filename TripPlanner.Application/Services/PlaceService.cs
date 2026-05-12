@@ -2,6 +2,8 @@
 using TripPlanner.Application.DTOs.Response;
 using TripPlanner.Application.Exceptions;
 using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Background;
+using TripPlanner.Application.Models;
 using TripPlanner.Domain.Entities;
 using TripPlanner.Domain.Enums;
 
@@ -10,14 +12,18 @@ namespace TripPlanner.Application.Services
     public class PlaceService : IPlaceService
     {
         private readonly IPlaceRepository _placeRepository;
+        private readonly IPlaceDetailsRepository _placeDetailsRepository;
         private readonly ITripRepository _tripRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IBackgroundTaskQueue _backgroundTaskQueue;
 
-        public PlaceService(IPlaceRepository placeRepository, ITripRepository tripRepository, IUnitOfWork unitOfWork)
+        public PlaceService(IPlaceRepository placeRepository, IPlaceDetailsRepository placeDetailsRepository, ITripRepository tripRepository, IUnitOfWork unitOfWork, IBackgroundTaskQueue backgroundTaskQueue)
         {
             _placeRepository = placeRepository;
+            _placeDetailsRepository = placeDetailsRepository;
             _tripRepository = tripRepository;
             _unitOfWork = unitOfWork;
+            _backgroundTaskQueue = backgroundTaskQueue;
         }
 
         public async Task<IEnumerable<TripPlaceResponse>> GetPlacesForTripAsync(Guid tripId, CancellationToken cancellationToken)
@@ -30,7 +36,7 @@ namespace TripPlanner.Application.Services
                 Name = place.Name,
                 Note = place.Note,
                 DayNumber = place.DayNumber,
-                DurationMinutes = place.DurationMinues,
+                DurationMinutes = place.DurationMinutes,
                 PlannedTime = place.PlannedTime,
                 Status = place.Status
             });
@@ -40,16 +46,39 @@ namespace TripPlanner.Application.Services
         {
             var trip = await _tripRepository.GetByIdAsync(request.TripId!.Value, cancellationToken);
             CheckAccess(trip, userId);
-            
+
+            PlaceDetails? placeDetails = await _placeDetailsRepository.GetByExternalIdAsync(request.ExternalId, cancellationToken);
+
+            if (placeDetails == null)
+            {
+                placeDetails = new PlaceDetails
+                {
+                    ExternalId = request.ExternalId,
+                    Name = request.Name,
+                    //Description = "", // TODO: Need to get the description for external API
+                    //ImageUrl = "" // TODO: Need to get the description for external API
+                };
+
+                await _placeDetailsRepository.AddAsync(placeDetails, cancellationToken);
+            }
+
             var place = new Place
             {
-                ExternalId = request.ExternalId,
                 TripId = request.TripId!.Value,
-                Name = request.Name
+                Name = request.Name,
+                PlaceDetailsId = placeDetails.Id
             };
             await _placeRepository.AddAsync(place, cancellationToken);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            var job = new PlaceDetailsGenerationJob
+            {
+                Id = placeDetails.Id,
+                PlaceLocation = trip!.Name,
+                PlaceName = place.Name
+            };
+            await _backgroundTaskQueue.QueueAsync(job, cancellationToken);
 
             return place.Id;
         }
@@ -79,7 +108,7 @@ namespace TripPlanner.Application.Services
             }
 
             place.Note = request.Note;
-            place.DurationMinues = request.DurationMinutes;
+            place.DurationMinutes = request.DurationMinutes;
             place.PlannedTime = request.PlannedTime;
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -144,9 +173,9 @@ namespace TripPlanner.Application.Services
                     var currentPlace = placesToUpdateTime.ElementAt(i);
                     var previousPlace = placesToUpdateTime.ElementAt(i - 1);
 
-                    if (currentPlace.PlannedTime < previousPlace.PlannedTime?.AddMinutes(previousPlace.DurationMinues ?? 0))
+                    if (currentPlace.PlannedTime < previousPlace.PlannedTime?.AddMinutes(previousPlace.DurationMinutes ?? 0))
                     {
-                        currentPlace.PlannedTime = previousPlace.PlannedTime?.AddMinutes(previousPlace.DurationMinues ?? 0);
+                        currentPlace.PlannedTime = previousPlace.PlannedTime?.AddMinutes(previousPlace.DurationMinutes ?? 0);
                     }
                 }
             }

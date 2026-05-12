@@ -5,12 +5,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Background;
 using TripPlanner.Application.Services;
+using TripPlanner.Infrastructure.Background;
 using TripPlanner.Infrastructure.Configurations;
 using TripPlanner.Infrastructure.Persistence;
 using TripPlanner.Infrastructure.Repositories;
 using TripPlanner.Infrastructure.Services;
 using TripPlanner.Infrastructure.Services.Google;
+using TripPlanner.Infrastructure.Services.LocalLlm;
+using TripPlanner.Infrastructure.Services.Unsplash;
 
 namespace TripPlanner.Infrastructure.Extensions
 {
@@ -65,6 +69,7 @@ namespace TripPlanner.Infrastructure.Extensions
 
             services.AddScoped<IPlaceService, PlaceService>();
             services.AddScoped<IPlaceProviderRequestLogRepository, PlaceProviderRequestLogRepository>();
+
             // TODO: Mocking up the Google Places API during development, will replace with real API calls later
             services.AddHttpClient<TestPlaceProvider>(client =>
             {
@@ -81,6 +86,23 @@ namespace TripPlanner.Infrastructure.Extensions
                 return new LoggingGooglePlaceProviderDecorator(googleProvider, logger, currentUserService);
             });
             services.AddScoped<IPlaceRepository, PlaceRepository>();
+
+            services.AddScoped<IPlaceDetailsRepository, PlaceDetailsRepository>();
+
+            services.AddHostedService<PlaceDetailsBackgroundService>();
+            services.AddScoped<IPlaceDetailsGenerationProcessor, PlaceDetailsGenerationProcessor>();
+
+            services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+            services.AddHttpClient<IDescriptionProvider, LocalLlmDescriptionProvider>(client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:5001");
+            });
+            services.AddHttpClient<IImageProvider, UnsplashImageProvider>(client =>
+            {
+                client.BaseAddress = new Uri("https://api.unsplash.com");
+                var key = configuration["UNSPLASH_ACCESS_KEY"];
+                client.DefaultRequestHeaders.Add("Authorization", "Client-ID " + key);
+            });
 
             services.AddScoped<ITripService, TripService>();
             services.AddScoped<ITripRepository, TripRepository>();

@@ -57,14 +57,14 @@ namespace TripPlanner.Application.Services
             List<PlaceDetailsResponse> placeResponses = new List<PlaceDetailsResponse>();
             foreach (var place in places)
             {
-                var placeResult = await _placeProvider.GetPlaceAsync(place.ExternalId!, cancellationToken);
+                var placeResult = await _placeProvider.GetPlaceAsync(place.PlaceDetails.ExternalId!, cancellationToken);
                 placeResponses.Add(new PlaceDetailsResponse
                 {
                     Id = place.Id,
                     ExternalPlaceId = placeResult.Id,
                     FormattedAddress = placeResult.FormattedAddress,
                     DayNumber = place.DayNumber,
-                    DurationMinutes = place.DurationMinues,
+                    DurationMinutes = place.DurationMinutes,
                     PlannedTime = place.PlannedTime,
                     Name = place.Name, //placeResult.Name,
                     Note = place.Note,

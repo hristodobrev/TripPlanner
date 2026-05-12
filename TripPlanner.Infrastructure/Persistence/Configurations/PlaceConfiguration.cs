@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TripPlanner.Domain.Entities;
-using TripPlanner.Domain.Enums;
 
 namespace TripPlanner.Infrastructure.Persistence.Configurations
 {
@@ -16,9 +15,10 @@ namespace TripPlanner.Infrastructure.Persistence.Configurations
                 .HasForeignKey(p => p.TripId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Property(x => x.ExternalId)
-            .IsRequired()
-            .HasMaxLength(200);
+            builder.HasOne(p => p.PlaceDetails)
+                .WithMany()
+                .HasForeignKey(p => p.PlaceDetailsId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(x => x.Name)
                 .IsRequired()

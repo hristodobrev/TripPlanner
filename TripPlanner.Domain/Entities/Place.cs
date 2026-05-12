@@ -8,15 +8,17 @@ namespace TripPlanner.Domain.Entities
         public int? DayNumber { get; set; }
         public int Order { get; set; }
 
-        public string? ExternalId { get; set; }
         public string Name { get; set; } = null!;
         public string? Note { get; set; }
         public TimeOnly? PlannedTime { get; set; }
-        public int? DurationMinues { get; set; }
+        public int? DurationMinutes { get; set; }
         public PlaceStatus Status { get; set; } = PlaceStatus.Planned;
 
         public Guid TripId { get; set; }
         public Trip Trip { get; set; } = null!;
+
+        public Guid PlaceDetailsId { get; set; }
+        public PlaceDetails PlaceDetails { get; set; } = null!;
 
         public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     }

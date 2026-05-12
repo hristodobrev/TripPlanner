@@ -9,6 +9,8 @@ namespace TripPlanner.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<PlaceProviderEndpointCost> builder)
         {
+            builder.HasKey(p => p.Id);
+
             builder.Property(p => p.PlaceProvider)
                 .IsRequired();
 
