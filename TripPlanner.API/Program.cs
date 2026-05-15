@@ -1,6 +1,6 @@
 using Microsoft.OpenApi;
 using TripPlanner.API.Middlewares;
-using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Services;
 using TripPlanner.Application.Services;
 using TripPlanner.Infrastructure.Extensions;
 

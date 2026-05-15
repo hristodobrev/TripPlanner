@@ -1,5 +1,5 @@
 ﻿using System.Threading.Channels;
-using TripPlanner.Application.Interfaces.Background;
+using TripPlanner.Application.Interfaces.Utilities;
 using TripPlanner.Application.Models;
 
 public class BackgroundTaskQueue : IBackgroundTaskQueue

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
 using System.Net.Http.Json;
-using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Providers;
 using TripPlanner.Infrastructure.Models.Unsplash;
 
 namespace TripPlanner.Infrastructure.Services.Unsplash

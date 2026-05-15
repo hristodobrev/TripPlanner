@@ -1,6 +1,6 @@
 ﻿using TripPlanner.Domain.Entities;
 
-namespace TripPlanner.Application.Interfaces
+namespace TripPlanner.Application.Interfaces.Repositories
 {
     public interface IPlaceProviderRequestLogRepository
     {

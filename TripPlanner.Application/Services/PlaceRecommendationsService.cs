@@ -1,27 +1,47 @@
 ﻿using TripPlanner.Application.DTOs.Response;
-using TripPlanner.Application.Interfaces;
-using TripPlanner.Domain.Entities;
+using TripPlanner.Application.Interfaces.Providers;
+using TripPlanner.Application.Interfaces.Repositories;
+using TripPlanner.Application.Interfaces.Services;
+using TripPlanner.Application.Models;
+using TripPlanner.Domain.DTOs;
 
 namespace TripPlanner.Application.Services
 {
     public class PlaceRecommendationsService : IPlaceRecommendationsService
     {
         private readonly ITripRepository _tripRepository;
-        public PlaceRecommendationsService(ITripRepository tripRepository)
+        private readonly IPlaceRecommendationsProvider _placeRecommendationsProvider;
+        
+        public PlaceRecommendationsService(ITripRepository tripRepository, IPlaceRecommendationsProvider placeRecommendationsProvider)
         {
             _tripRepository = tripRepository;
+            _placeRecommendationsProvider = placeRecommendationsProvider;
         }
 
         public async Task<IEnumerable<PlaceRecommendationsResponse>> GetPlaceRecommendationsAsync(Guid userId, CancellationToken cancellationToken)
         {
-            IEnumerable<Trip> trips = await _tripRepository.GetByUserIdAsync(userId, cancellationToken);
-
-            if (!trips.Any())
+            IEnumerable<VisitedPlaceDto> visitedPlaces = await _tripRepository.GetTopDestinations(userId, cancellationToken);
+            List<PlaceRecommendationRequest> recommendations = new List<PlaceRecommendationRequest>();
+            foreach (var item in visitedPlaces)
             {
-                // TODO: Get top 5 most popular places from the database and use them for the recommendations
+                recommendations.Add(new PlaceRecommendationRequest
+                {
+                    name = item.Name,
+                    country = item.Country,
+                    description = item.Description
+                });
             }
 
-            throw new NotImplementedException();
+            return (await _placeRecommendationsProvider.GetPlaceRecommendationsAsync(recommendations, 3, cancellationToken)).Select(r => new PlaceRecommendationsResponse { 
+                Name = r.Name,
+                Country = r.Country,
+                Description = r.Description,
+                PlaceId = r.PlaceId,
+                ImageUrl = r.ImageUrl,
+                ImageAuthor = r.ImageAuthor,
+                ImageAuthorUrl = r.ImageAuthorUrl,
+                ImageSource = r.ImageSource,
+            });
         }
     }
 }

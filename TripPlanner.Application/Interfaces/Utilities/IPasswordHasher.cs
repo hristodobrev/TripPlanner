@@ -1,4 +1,4 @@
-﻿namespace TripPlanner.Application.Interfaces
+﻿namespace TripPlanner.Application.Interfaces.Utilities
 {
     public interface IPasswordHasher
     {

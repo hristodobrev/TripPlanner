@@ -1,5 +1,6 @@
 ﻿using TripPlanner.Application.DTOs.Response;
-using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Repositories;
+using TripPlanner.Application.Interfaces.Services;
 
 namespace TripPlanner.Application.Services
 {

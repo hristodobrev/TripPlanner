@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Repositories;
+using TripPlanner.Domain.DTOs;
 using TripPlanner.Domain.Entities;
 using TripPlanner.Infrastructure.Persistence;
 
@@ -18,7 +19,7 @@ namespace TripPlanner.Infrastructure.Repositories
             await _dbContext.Trips.AddAsync(trip, cancellationToken);
         }
 
-        public async Task<Trip?> GetByIdAsync(Guid id,  CancellationToken cancellationToken)
+        public async Task<Trip?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _dbContext.Trips
                 .Where(t => t.Id == id)
@@ -42,6 +43,39 @@ namespace TripPlanner.Infrastructure.Repositories
                 .Include(t => t.DestinationPlace)
                 .Where(t => t.UserId == userId)
                 .ToListAsync(cancellationToken);
+        }
+
+        public async Task<IEnumerable<VisitedPlaceDto>> GetTopDestinations(Guid userId, CancellationToken cancellationToken)
+        {
+            var places = await _dbContext.Trips
+                .Where(t => t.UserId == userId)
+                .Select(t => t.DestinationPlace)
+                .Where(p => p != null)
+                .GroupBy(p => p!.Id)
+                .Select(g => new VisitedPlaceDto
+                {
+                    Name = g.FirstOrDefault()!.Name ?? string.Empty,
+                    Country = g.FirstOrDefault()!.Country,
+                    Description = g.FirstOrDefault()!.Description
+                })
+                .ToListAsync(cancellationToken);
+
+            if (places == null || !places.Any())
+            {
+                places = await _dbContext.Trips
+                    .GroupBy(t => t.DestinationPlaceId)
+                    .OrderByDescending(g => g.Count())
+                    .Take(5)
+                    .Select(g => new VisitedPlaceDto
+                    {
+                        Name = g.FirstOrDefault()!.DestinationPlace.Name ?? string.Empty,
+                        Country = g.FirstOrDefault()!.DestinationPlace.Country,
+                        Description = g.FirstOrDefault()!.DestinationPlace.Description
+                    })
+                    .ToListAsync(cancellationToken);
+            }
+
+            return places;
         }
 
         public void Remove(Trip trip)

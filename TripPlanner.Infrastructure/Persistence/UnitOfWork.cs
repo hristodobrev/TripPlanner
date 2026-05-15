@@ -1,4 +1,4 @@
-﻿using TripPlanner.Application.Interfaces;
+﻿using TripPlanner.Application.Interfaces.Utilities;
 
 namespace TripPlanner.Infrastructure.Persistence
 {

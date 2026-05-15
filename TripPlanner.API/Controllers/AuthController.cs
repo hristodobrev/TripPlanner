@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TripPlanner.Application.DTOs.Request;
 using TripPlanner.Application.DTOs.Response;
-using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Services;
 
 namespace TripPlanner.API.Controllers
 {

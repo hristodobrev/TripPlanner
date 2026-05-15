@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Providers;
 using TripPlanner.Application.Models;
 using TripPlanner.Infrastructure.Mapping;
 using TripPlanner.Infrastructure.Models.Google;

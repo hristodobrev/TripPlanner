@@ -1,4 +1,6 @@
-﻿using TripPlanner.Application.Interfaces;
+﻿using TripPlanner.Application.Interfaces.Providers;
+using TripPlanner.Application.Interfaces.Repositories;
+using TripPlanner.Application.Interfaces.Services;
 using TripPlanner.Application.Models;
 using TripPlanner.Domain.Entities;
 using TripPlanner.Domain.Enums;

@@ -4,12 +4,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using TripPlanner.Application.Interfaces;
-using TripPlanner.Application.Interfaces.Background;
+using TripPlanner.Application.Interfaces.Providers;
+using TripPlanner.Application.Interfaces.QueryServices;
+using TripPlanner.Application.Interfaces.Repositories;
+using TripPlanner.Application.Interfaces.Services;
+using TripPlanner.Application.Interfaces.Utilities;
 using TripPlanner.Application.Services;
 using TripPlanner.Infrastructure.Background;
 using TripPlanner.Infrastructure.Configurations;
 using TripPlanner.Infrastructure.Persistence;
+using TripPlanner.Infrastructure.QueryServices;
 using TripPlanner.Infrastructure.Repositories;
 using TripPlanner.Infrastructure.Services;
 using TripPlanner.Infrastructure.Services.Google;
@@ -61,6 +65,7 @@ namespace TripPlanner.Infrastructure.Extensions
 
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserDashboardQueryService, UserDashboardQueryService>();
             services.AddScoped<IUserRepository, UserRepository>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -97,6 +102,7 @@ namespace TripPlanner.Infrastructure.Extensions
             {
                 client.BaseAddress = new Uri("http://localhost:5001");
             });
+            services.AddScoped<IPlaceRecommendationsService, PlaceRecommendationsService>();
             services.AddHttpClient<IPlaceRecommendationsProvider, LocalLlmPlaceRecommendationsProvider>(client =>
             {
                 client.BaseAddress = new Uri("http://localhost:5001");

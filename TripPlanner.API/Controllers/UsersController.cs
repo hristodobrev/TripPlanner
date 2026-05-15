@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TripPlanner.Application.Interfaces;
+using TripPlanner.API.Extensions;
+using TripPlanner.Application.Interfaces.QueryServices;
+using TripPlanner.Application.Interfaces.Services;
 
 namespace TripPlanner.API.Controllers
 {
@@ -10,9 +12,11 @@ namespace TripPlanner.API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
-        public UsersController(IUserService userService)
+        private readonly IUserDashboardQueryService _userDashboardQueryService;
+        public UsersController(IUserService userService, IUserDashboardQueryService userDashboardQueryService)
         {
             _userService = userService;
+            _userDashboardQueryService = userDashboardQueryService;
         }
 
         [HttpGet("search/{keyword}")]
@@ -21,7 +25,14 @@ namespace TripPlanner.API.Controllers
             var result = await _userService.SearchAsync(keyword, cancellationToken);
 
             return Ok(result);
+        }
 
+        [HttpGet("dashboard")]
+        public async Task<IActionResult> GetDashboardSummary(CancellationToken cancellationToken)
+        {
+            var result = await _userDashboardQueryService.GetSummaryAsync(User.GetUserId(), cancellationToken);
+
+            return Ok(result);
         }
     }
 }

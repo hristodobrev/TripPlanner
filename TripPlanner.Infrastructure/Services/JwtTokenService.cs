@@ -2,7 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Services;
 using TripPlanner.Domain.Entities;
 using TripPlanner.Infrastructure.Configurations;
 

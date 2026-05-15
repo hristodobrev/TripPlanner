@@ -2,8 +2,8 @@
 {
     public class PlaceRecommendationRequest
     {
-        public string Name { get; set; } = null!;
-        public string? Country { get; set; }
-        public string? Description { get; set; }
+        public string name { get; set; } = null!;
+        public string? country { get; set; }
+        public string? description { get; set; }
     }
 }

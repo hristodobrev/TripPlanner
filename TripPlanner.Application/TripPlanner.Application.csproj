@@ -10,4 +10,8 @@
     <ProjectReference Include="..\TripPlanner.Domain\TripPlanner.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
+
 </Project>

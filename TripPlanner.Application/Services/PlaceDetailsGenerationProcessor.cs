@@ -1,4 +1,6 @@
-﻿using TripPlanner.Application.Interfaces;
+﻿using TripPlanner.Application.Interfaces.Providers;
+using TripPlanner.Application.Interfaces.Repositories;
+using TripPlanner.Application.Interfaces.Utilities;
 using TripPlanner.Application.Models;
 
 namespace TripPlanner.Application.Services

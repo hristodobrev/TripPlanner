@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Services;
 using TripPlanner.Application.Services;
 
 namespace TripPlanner.API.Controllers

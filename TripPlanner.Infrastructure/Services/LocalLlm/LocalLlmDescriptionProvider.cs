@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Providers;
 using TripPlanner.Infrastructure.Models.LocalLlm;
 
 namespace TripPlanner.Infrastructure.Services.LocalLlm

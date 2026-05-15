@@ -1,4 +1,4 @@
-﻿namespace TripPlanner.Application.Interfaces
+﻿namespace TripPlanner.Application.Interfaces.Providers
 {
     public interface IDescriptionProvider
     {

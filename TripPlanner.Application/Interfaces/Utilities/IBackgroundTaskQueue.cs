@@ -1,6 +1,6 @@
 ﻿using TripPlanner.Application.Models;
 
-namespace TripPlanner.Application.Interfaces.Background
+namespace TripPlanner.Application.Interfaces.Utilities
 {
     public interface IBackgroundTaskQueue
     {

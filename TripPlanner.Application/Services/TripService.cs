@@ -2,8 +2,10 @@
 using TripPlanner.Application.DTOs.Request;
 using TripPlanner.Application.DTOs.Response;
 using TripPlanner.Application.Exceptions;
-using TripPlanner.Application.Interfaces;
-using TripPlanner.Application.Interfaces.Background;
+using TripPlanner.Application.Interfaces.Utilities;
+using TripPlanner.Application.Interfaces.Repositories;
+using TripPlanner.Application.Interfaces.Services;
+using TripPlanner.Application.Interfaces.Utilities;
 using TripPlanner.Application.Models;
 using TripPlanner.Domain.Entities;
 using TripPlanner.Domain.Enums;

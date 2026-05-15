@@ -1,6 +1,6 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
-using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Repositories;
 using TripPlanner.Domain.Entities;
 using TripPlanner.Infrastructure.Persistence;
 

@@ -1,7 +1,9 @@
 ﻿using TripPlanner.Application.DTOs.Request;
 using TripPlanner.Application.DTOs.Response;
 using TripPlanner.Application.Exceptions;
-using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Repositories;
+using TripPlanner.Application.Interfaces.Services;
+using TripPlanner.Application.Interfaces.Utilities;
 using TripPlanner.Domain.Entities;
 
 namespace TripPlanner.Application.Services

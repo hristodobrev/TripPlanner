@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using TripPlanner.Application.Interfaces;
-using TripPlanner.Application.Interfaces.Background;
+using TripPlanner.Application.Interfaces.Utilities;
+using TripPlanner.Application.Interfaces.Utilities;
 
 namespace TripPlanner.Infrastructure.Background
 {

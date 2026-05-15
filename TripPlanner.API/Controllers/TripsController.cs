@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using TripPlanner.API.Extensions;
 using TripPlanner.Application.DTOs.Request;
-using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Services;
 
 namespace TripPlanner.API.Controllers
 {
@@ -13,9 +12,11 @@ namespace TripPlanner.API.Controllers
     public class TripsController : ControllerBase
     {
         private readonly ITripService _tripService;
-        public TripsController(ITripService tripService)
+        private readonly IPlaceRecommendationsService _placeRecommendationsService;
+        public TripsController(ITripService tripService, IPlaceRecommendationsService placeRecommendationsService)
         {
             _tripService = tripService;
+            _placeRecommendationsService = placeRecommendationsService;
         }
 
         [HttpPost]
@@ -42,13 +43,12 @@ namespace TripPlanner.API.Controllers
             return Ok(trip);
         }
 
-        [HttpGet("shared")]
-        public async Task<IActionResult> GetShared(CancellationToken cancellationToken)
+        [HttpGet("recommendations")]
+        public async Task<IActionResult> GetRecommendations(CancellationToken cancellationToken)
         {
-            //var trip = await _tripService.GetByIdForUserAsync(id, User.GetUserId(), cancellationToken);
+            var recommendations = await _placeRecommendationsService.GetPlaceRecommendationsAsync(User.GetUserId(), cancellationToken);
 
-            //return Ok(trip);
-            return Ok();
+            return Ok(recommendations);
         }
 
         [HttpDelete("{id}")]
