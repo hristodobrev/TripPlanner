@@ -9,8 +9,8 @@ namespace TripPlanner.Infrastructure.Persistence
 
         public DbSet<User> Users { get; set; }
         public DbSet<Trip> Trips { get; set; }
+        public DbSet<TripPlace> TripPlaces { get; set; }
         public DbSet<Place> Places { get; set; }
-        public DbSet<PlaceDetails> PlaceDetails { get; set; }
         public DbSet<TripShare> TripShares { get; set; }
         public DbSet<PlaceProviderRequestLog> PlaceProviderRequestLogs { get; set; }
         public DbSet<PlaceProviderEndpointCost> PlaceProviderEndpointCosts { get; set; }

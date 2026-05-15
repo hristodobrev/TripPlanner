@@ -1,24 +1,14 @@
-﻿using TripPlanner.Domain.Enums;
-
-namespace TripPlanner.Domain.Entities
+﻿namespace TripPlanner.Domain.Entities
 {
     public class Place
     {
         public Guid Id { get; set; } = Guid.NewGuid();
-        public int? DayNumber { get; set; }
-        public int Order { get; set; }
 
-        public string Name { get; set; } = null!;
-        public string? Note { get; set; }
-        public TimeOnly? PlannedTime { get; set; }
-        public int? DurationMinutes { get; set; }
-        public PlaceStatus Status { get; set; } = PlaceStatus.Planned;
-
-        public Guid TripId { get; set; }
-        public Trip Trip { get; set; } = null!;
-
-        public Guid PlaceDetailsId { get; set; }
-        public PlaceDetails PlaceDetails { get; set; } = null!;
+        public string ExternalId { get; set; } = null!;
+        public string? Name { get; set; }
+        public string? Country { get; set; }
+        public string? Description { get; set; }
+        public string? ImageUrl { get; set; }
 
         public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     }

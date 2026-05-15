@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TripPlanner.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using TripPlanner.Infrastructure.Persistence;
 namespace TripPlanner.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260514202151_RenamePlaceDetailsToPlaces")]
+    partial class RenamePlaceDetailsToPlaces
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -209,8 +212,13 @@ namespace TripPlanner.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<Guid>("DestinationPlaceId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("DestinationExternalId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DestinationName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
@@ -226,8 +234,6 @@ namespace TripPlanner.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DestinationPlaceId");
 
                     b.HasIndex("UserId");
 
@@ -260,7 +266,7 @@ namespace TripPlanner.Infrastructure.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("PlaceId")
+                    b.Property<Guid>("PlaceDetailsId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<TimeOnly?>("PlannedTime")
@@ -274,7 +280,7 @@ namespace TripPlanner.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlaceId");
+                    b.HasIndex("PlaceDetailsId");
 
                     b.HasIndex("TripId");
 
@@ -347,28 +353,20 @@ namespace TripPlanner.Infrastructure.Migrations
 
             modelBuilder.Entity("TripPlanner.Domain.Entities.Trip", b =>
                 {
-                    b.HasOne("TripPlanner.Domain.Entities.Place", "DestinationPlace")
-                        .WithMany()
-                        .HasForeignKey("DestinationPlaceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("TripPlanner.Domain.Entities.User", "User")
                         .WithMany("Trips")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DestinationPlace");
-
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("TripPlanner.Domain.Entities.TripPlace", b =>
                 {
-                    b.HasOne("TripPlanner.Domain.Entities.Place", "Place")
+                    b.HasOne("TripPlanner.Domain.Entities.Place", "PlaceDetails")
                         .WithMany()
-                        .HasForeignKey("PlaceId")
+                        .HasForeignKey("PlaceDetailsId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -378,7 +376,7 @@ namespace TripPlanner.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Place");
+                    b.Navigation("PlaceDetails");
 
                     b.Navigation("Trip");
                 });

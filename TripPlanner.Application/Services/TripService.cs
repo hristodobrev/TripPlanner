@@ -3,6 +3,8 @@ using TripPlanner.Application.DTOs.Request;
 using TripPlanner.Application.DTOs.Response;
 using TripPlanner.Application.Exceptions;
 using TripPlanner.Application.Interfaces;
+using TripPlanner.Application.Interfaces.Background;
+using TripPlanner.Application.Models;
 using TripPlanner.Domain.Entities;
 using TripPlanner.Domain.Enums;
 
@@ -13,25 +15,49 @@ namespace TripPlanner.Application.Services
         private readonly ITripRepository _tripRepository;
         private readonly ITripShareRepository _tripShareRepository;
         private readonly IPlaceSearchService _placeSearchService;
+        private readonly IPlaceRepository _placeRepository;
+        private readonly IBackgroundTaskQueue _backgroundTaskQueue;
         private readonly IUnitOfWork _unitOfWork;
-        public TripService(ITripRepository tripRepository, ITripShareRepository tripShareRepository, IPlaceSearchService placeSearchService, IUnitOfWork unitOfWork)
+        public TripService(ITripRepository tripRepository, ITripShareRepository tripShareRepository, IPlaceSearchService placeSearchService, IPlaceRepository placeRepository, IBackgroundTaskQueue backgroundTaskQueue, IUnitOfWork unitOfWork)
         {
             _tripRepository = tripRepository;
             _tripShareRepository = tripShareRepository;
             _placeSearchService = placeSearchService;
+            _placeRepository = placeRepository;
             _unitOfWork = unitOfWork;
+            _backgroundTaskQueue = backgroundTaskQueue;
         }
 
         public async Task<Guid> AddAsync(TripRequest request, Guid userId, CancellationToken cancellationToken)
         {
+            var destinationPlace = await _placeRepository.GetByExternalIdAsync(request.PlaceId, cancellationToken);
+            if (destinationPlace == null)
+            {
+                destinationPlace = new Place
+                {
+                    ExternalId = request.PlaceId,
+                    Name = request.DestinationName,
+                    Country = request.DestinationCountry
+                };
+                await _placeRepository.AddAsync(destinationPlace, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                var job = new PlaceDetailsGenerationJob
+                {
+                    Id = destinationPlace!.Id,
+                    PlaceLocation = request.DestinationCountry,
+                    PlaceName = request.DestinationName
+                };
+                await _backgroundTaskQueue.QueueAsync(job, cancellationToken);
+            }
+
             var tripToAdd = new Trip
             {
                 Name = request.Name,
                 Description = request.Description,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
-                DestinationExternalId = request.PlaceId,
-                DestinationName = request.PlaceName,
+                DestinationPlaceId = destinationPlace.Id,
                 UserId = userId
             };
 
@@ -70,7 +96,7 @@ namespace TripPlanner.Application.Services
                 throw new ForbiddenException("Access denied.");
             }
 
-            var tripLocation = await _placeSearchService.GetByExternalIdAsync(trip.DestinationExternalId, cancellationToken);
+            var tripLocation = await _placeSearchService.GetByExternalIdAsync(trip.DestinationPlace.ExternalId, cancellationToken);
 
             var places = await _placeSearchService.GetPlacesForTripWithDetailsAsync(id, cancellationToken);
 
@@ -85,7 +111,7 @@ namespace TripPlanner.Application.Services
                 Description = trip.Description,
                 StartDate = trip.StartDate,
                 EndDate = trip.EndDate,
-                DestinationExternalId = trip.DestinationExternalId,
+                DestinationExternalId = trip.DestinationPlace.ExternalId,
                 Places = places,
                 Shared = tripShare != null,
                 SharedPermission = tripShare?.Permission,
@@ -111,7 +137,7 @@ namespace TripPlanner.Application.Services
                 Description = t.Description,
                 StartDate = t.StartDate,
                 EndDate = t.EndDate,
-                DestinationExternalId = t.DestinationExternalId,
+                DestinationExternalId = t.DestinationPlace.ExternalId,
                 Shared = shared,
                 SharedPermission = permission,
                 CreatedAtUtc = t.CreatedAtUtc

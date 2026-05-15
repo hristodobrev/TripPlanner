@@ -11,7 +11,9 @@ namespace TripPlanner.Application.DTOs.Request
         [Required]
         public string PlaceId { get; set; } = null!;
         [Required]
-        public string PlaceName { get; set; } = null!;
+        public string DestinationName { get; set; } = null!;
+        [Required]
+        public string DestinationCountry { get; set; } = null!;
         [Required]
         public DateTime StartDate { get; set; }
         [Required]

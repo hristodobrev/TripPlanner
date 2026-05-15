@@ -11,8 +11,8 @@ namespace TripPlanner.API.Controllers
     [Authorize]
     public class PlacesController : ControllerBase
     {
-        private readonly IPlaceService _placeService;
-        public PlacesController(IPlaceService placeService)
+        private readonly ITripPlaceService _placeService;
+        public PlacesController(ITripPlaceService placeService)
         {
             _placeService = placeService;
         }

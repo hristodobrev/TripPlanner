@@ -13,7 +13,6 @@ namespace TripPlanner.API.Controllers
     public class TripsController : ControllerBase
     {
         private readonly ITripService _tripService;
-        private readonly ITripShareService _tripShareService;
         public TripsController(ITripService tripService)
         {
             _tripService = tripService;

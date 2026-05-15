@@ -5,18 +5,18 @@ namespace TripPlanner.Application.Services
 {
     public class PlaceDetailsGenerationProcessor : IPlaceDetailsGenerationProcessor
     {
-        private readonly IPlaceDetailsRepository _placeDetailsRepository;
+        private readonly IPlaceRepository _placeRepository;
         private readonly IImageProvider _imageProvider;
         private readonly IDescriptionProvider _descriptionProvider;
         private readonly IUnitOfWork _unitOfWork;
 
         public PlaceDetailsGenerationProcessor(
-            IPlaceDetailsRepository placeDetailsRepository,
+            IPlaceRepository placeRepository,
             IImageProvider imageProvider,
             IDescriptionProvider descriptionProvider,
             IUnitOfWork unitOfWork)
         {
-            _placeDetailsRepository = placeDetailsRepository;
+            _placeRepository = placeRepository;
             _imageProvider = imageProvider;
             _descriptionProvider = descriptionProvider;
             _unitOfWork = unitOfWork;
@@ -26,9 +26,9 @@ namespace TripPlanner.Application.Services
             PlaceDetailsGenerationJob job,
             CancellationToken cancellationToken)
         {
-            var placeDetails = await _placeDetailsRepository
+            var place = await _placeRepository
                 .GetByIdAsync(job.Id, cancellationToken);
-            if (placeDetails == null)
+            if (place == null)
             {
                 return;
             }
@@ -37,15 +37,15 @@ namespace TripPlanner.Application.Services
 
             try
             {
-                //if (string.IsNullOrEmpty(placeDetails.Description))
-                //{
-                //    placeDetails.Description = await _descriptionProvider.GetDescriptionAsync(job.PlaceName, job.PlaceLocation, cancellationToken);
-                //    hasChanges = true;
-                //}
-
-                if (string.IsNullOrEmpty(placeDetails.ImageUrl))
+                if (string.IsNullOrEmpty(place.Description))
                 {
-                    placeDetails.ImageUrl = await _imageProvider.GetImageUrlAsync($"{job.PlaceName}, {job.PlaceLocation}", cancellationToken);
+                    place.Description = await _descriptionProvider.GetDescriptionAsync(job.PlaceName, job.PlaceLocation, cancellationToken);
+                    hasChanges = true;
+                }
+
+                if (string.IsNullOrEmpty(place.ImageUrl))
+                {
+                    place.ImageUrl = await _imageProvider.GetImageUrlAsync($"{job.PlaceName}, {job.PlaceLocation}", cancellationToken);
                     hasChanges = true;
                 }
             }

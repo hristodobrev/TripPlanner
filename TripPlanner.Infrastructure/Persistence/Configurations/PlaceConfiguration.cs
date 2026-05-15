@@ -8,27 +8,13 @@ namespace TripPlanner.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Place> builder)
         {
-            builder.HasKey(p => p.Id);
+            builder.ToTable("Places");
 
-            builder.HasOne(p => p.Trip)
-                .WithMany(t => t.Places)
-                .HasForeignKey(p => p.TripId)
-                .OnDelete(DeleteBehavior.Cascade);
+            builder.HasKey(x => x.Id);
 
-            builder.HasOne(p => p.PlaceDetails)
-                .WithMany()
-                .HasForeignKey(p => p.PlaceDetailsId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Property(x => x.Name)
+            builder.Property(x => x.ExternalId)
                 .IsRequired()
                 .HasMaxLength(200);
-
-            builder.Property(x => x.Status)
-                .IsRequired();
-
-            builder.Property(u => u.CreatedAtUtc)
-                .IsRequired();
         }
     }
 }

@@ -15,7 +15,7 @@ namespace TripPlanner.Application.DTOs.Response
         public decimal DestinationLongitude { get; set; }
         public bool Shared { get; set; }
         public TripPermission? SharedPermission { get; set; }
-        public IEnumerable<PlaceDetailsResponse> Places { get; set; } = null!;
+        public IEnumerable<PlacesResponse> Places { get; set; } = null!;
         public DateTime CreatedAtUtc { get; set; }
     }
 }

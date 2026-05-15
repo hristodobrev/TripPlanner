@@ -2,7 +2,7 @@
 
 namespace TripPlanner.Application.DTOs.Response
 {
-    public class PlaceDetailsResponse
+    public class PlacesResponse
     {
         public Guid Id { get; set; }
         public string? ExternalPlaceId { get; set; }

@@ -24,6 +24,7 @@ namespace TripPlanner.Infrastructure.Repositories
                 .Where(t => t.Id == id)
                 .Include(t => t.Places.OrderBy(p => p.Order))
                 .Include(t => t.TripShares)
+                .Include(t => t.DestinationPlace)
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
@@ -38,6 +39,7 @@ namespace TripPlanner.Infrastructure.Repositories
         public async Task<IEnumerable<Trip>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
         {
             return await _dbContext.Trips
+                .Include(t => t.DestinationPlace)
                 .Where(t => t.UserId == userId)
                 .ToListAsync(cancellationToken);
         }

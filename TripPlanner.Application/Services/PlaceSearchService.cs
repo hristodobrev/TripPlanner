@@ -5,10 +5,10 @@ namespace TripPlanner.Application.Services
 {
     public class PlaceSearchService : IPlaceSearchService
     {
-        private readonly IPlaceRepository _placeRepository;
+        private readonly ITripPlaceRepository _placeRepository;
         private readonly IPlaceProvider _placeProvider;
 
-        public PlaceSearchService(IPlaceProvider placeProvider, IPlaceRepository placeRepository)
+        public PlaceSearchService(IPlaceProvider placeProvider, ITripPlaceRepository placeRepository)
         {
             _placeProvider = placeProvider;
             _placeRepository = placeRepository;
@@ -50,15 +50,15 @@ namespace TripPlanner.Application.Services
             };
         }
 
-        public async Task<IEnumerable<PlaceDetailsResponse>> GetPlacesForTripWithDetailsAsync(Guid tripId, CancellationToken cancellationToken)
+        public async Task<IEnumerable<PlacesResponse>> GetPlacesForTripWithDetailsAsync(Guid tripId, CancellationToken cancellationToken)
         {
             var places = await _placeRepository.GetByTripIdAsync(tripId, cancellationToken);
 
-            List<PlaceDetailsResponse> placeResponses = new List<PlaceDetailsResponse>();
+            List<PlacesResponse> placeResponses = new List<PlacesResponse>();
             foreach (var place in places)
             {
-                var placeResult = await _placeProvider.GetPlaceAsync(place.PlaceDetails.ExternalId!, cancellationToken);
-                placeResponses.Add(new PlaceDetailsResponse
+                var placeResult = await _placeProvider.GetPlaceAsync(place.Place.ExternalId!, cancellationToken);
+                placeResponses.Add(new PlacesResponse
                 {
                     Id = place.Id,
                     ExternalPlaceId = placeResult.Id,

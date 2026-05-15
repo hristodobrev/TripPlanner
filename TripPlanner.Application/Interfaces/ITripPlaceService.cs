@@ -3,7 +3,7 @@ using TripPlanner.Application.DTOs.Response;
 
 namespace TripPlanner.Application.Interfaces
 {
-    public interface IPlaceService
+    public interface ITripPlaceService
     {
         Task<IEnumerable<TripPlaceResponse>> GetPlacesForTripAsync(Guid tripId, CancellationToken cancellationToken);
         Task<Guid> AddAsync(AddPlaceRequest request, Guid userId, CancellationToken cancellationToken);

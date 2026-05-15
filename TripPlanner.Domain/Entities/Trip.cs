@@ -10,15 +10,17 @@
 
         public int DurationInDays => (EndDate - StartDate).Days;
 
-        public string DestinationExternalId { get; set; } = null!;
-        public string DestinationName { get; set; } = null!;
+        public Guid DestinationPlaceId { get; set; }
+        public Place DestinationPlace { get; set; } = null!;
+        //public string DestinationExternalId { get; set; } = null!;
+        //public string DestinationName { get; set; } = null!;
 
         public IEnumerable<TripShare> TripShares { get; set; } = null!;
 
         public Guid UserId { get; set; }
         public User User { get; set; } = null!;
 
-        public IEnumerable<Place> Places { get; set; } = null!;
+        public IEnumerable<TripPlace> Places { get; set; } = null!;
 
         public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     }
