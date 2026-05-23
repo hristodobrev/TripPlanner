@@ -76,9 +76,6 @@ namespace TripPlanner.Infrastructure.Services.Google
         /// <returns></returns>
         public async Task<string> GetPlacePhotoAsync(string photoName, CancellationToken cancellationToken)
         {
-            //// Monthly quota for Google Place Photo API of 1000 requests has been reached, so temporarily return null for photo url until the quota is reset in next month
-            //return null;
-
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, $"v1/{photoName}/media?maxWidthPx=800&skipHttpRedirect=true");
 
             HttpResponseMessage response = await _httpClient.SendAsync(requestMessage, cancellationToken);
@@ -101,7 +98,7 @@ namespace TripPlanner.Infrastructure.Services.Google
             var body = new
             {
                 textQuery = query,
-                pageSize = 10,
+                pageSize = 5,
                 locationBias = new
                 {
                     circle = new

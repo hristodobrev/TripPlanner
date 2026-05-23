@@ -32,7 +32,7 @@ namespace TripPlanner.Application.Services
             var placeResult = await _placeProvider.GetPlaceAsync(externalId, cancellationToken);
 
             // Costs optimization - when getting the place for the trip destination there is no need to get its photos as they aren't used.
-            var photoTasks = placeResult.Photos.Take(5).Select(async (p) => await _placeProvider.GetPlacePhotoAsync(p.Name, cancellationToken));
+            var photoTasks = placeResult.Photos.Take(1).Select(async (p) => await _placeProvider.GetPlacePhotoAsync(p.Name, cancellationToken));
             var photos = await Task.WhenAll(photoTasks);
 
             return new GetPlaceResponse

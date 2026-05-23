@@ -45,6 +45,7 @@ namespace TripPlanner.Infrastructure.Repositories
             return await _dbContext.TripShares
                 .Where(ts => ts.UserId == userId)
                 .Include(ts => ts.Trip)
+                .Include(ts => ts.Trip.DestinationPlace)
                 .ToListAsync(cancellationToken);
         }
 
