@@ -1,8 +1,10 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using TripPlanner.API.Middlewares;
 using TripPlanner.Application.Interfaces.Services;
 using TripPlanner.Application.Services;
 using TripPlanner.Infrastructure.Extensions;
+using TripPlanner.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +41,12 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+    db.Database.Migrate();
+}
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

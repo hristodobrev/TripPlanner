@@ -76,7 +76,7 @@ namespace TripPlanner.Infrastructure.Extensions
             services.AddScoped<IPlaceProviderRequestLogRepository, PlaceProviderRequestLogRepository>();
 
             // TODO: Mocking up the Google Places API during development, will replace with real API calls later
-            services.AddHttpClient<TestPlaceProvider>(client =>
+            services.AddHttpClient<GooglePlaceProvider>(client =>
             {
                 client.BaseAddress = new Uri("https://places.googleapis.com/");
                 var googlePlacesKey = configuration["GooglePlaces:ApiKey"];
@@ -84,7 +84,7 @@ namespace TripPlanner.Infrastructure.Extensions
             });
             services.AddScoped<IPlaceProvider>(sp =>
             {
-                var googleProvider = sp.GetRequiredService<TestPlaceProvider>();
+                var googleProvider = sp.GetRequiredService<GooglePlaceProvider>();
                 var logger = sp.GetRequiredService<IPlaceProviderRequestLogRepository>();
                 var currentUserService = sp.GetRequiredService<ICurrentUserService>();
 
@@ -100,12 +100,12 @@ namespace TripPlanner.Infrastructure.Extensions
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             services.AddHttpClient<IDescriptionProvider, LocalLlmDescriptionProvider>(client =>
             {
-                client.BaseAddress = new Uri("http://localhost:5001");
+                client.BaseAddress = new Uri(configuration["AiService:BaseUrl"]);
             });
             services.AddScoped<IPlaceRecommendationsService, PlaceRecommendationsService>();
             services.AddHttpClient<IPlaceRecommendationsProvider, LocalLlmPlaceRecommendationsProvider>(client =>
             {
-                client.BaseAddress = new Uri("http://localhost:5001");
+                client.BaseAddress = new Uri(configuration["AiService:BaseUrl"]);
             });
             services.AddHttpClient<IImageProvider, UnsplashImageProvider>(client =>
             {
