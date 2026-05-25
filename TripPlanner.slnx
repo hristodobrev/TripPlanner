@@ -1,5 +1,7 @@
 <Solution>
+  <Project Path="TripPlanner.API.Tests/TripPlanner.API.Tests.csproj" Id="8b1246c6-be96-48c0-9d6c-20c484b527e2" />
   <Project Path="TripPlanner.API/TripPlanner.API.csproj" Id="0185f4ab-09da-4aac-a04d-559d573ed630" />
+  <Project Path="TripPlanner.Application.Tests/TripPlanner.Application.Tests.csproj" Id="966584b0-318d-47c1-ba3e-eff2a987ebb6" />
   <Project Path="TripPlanner.Application/TripPlanner.Application.csproj" Id="c1366562-152c-47b1-9d6f-975b98b207b7" />
   <Project Path="TripPlanner.Domain/TripPlanner.Domain.csproj" Id="e0d33bb1-867a-487c-bfa1-c1d81b55897d" />
   <Project Path="TripPlanner.Infrastructure/TripPlanner.Infrastructure.csproj" Id="6f762526-8186-4a89-afc2-0494aad0356c" />
